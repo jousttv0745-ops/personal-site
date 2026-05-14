@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-white text-[#0a0a0a];
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Page transition */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 150ms ease-out fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 150ms ease-in fade-in;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Section label utility */
+.section-label {
+  @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-400;
+}
+
+/* Thick rule utility */
+.rule-strong {
+  @apply border-t-2 border-[#0a0a0a];
+}

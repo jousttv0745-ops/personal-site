@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const experience = [
+  {
+    role: 'Data Product Manager',
+    company: 'TVBS Media',
+    period: '2025.07 — Present',
+    groups: [
+      {
+        label: 'Audience Infrastructure & CDP Governance',
+        items: [
+          'Led CDP architecture and audience governance strategy for a cross-platform infrastructure supporting tens of millions of users.',
+          'Developed audience governance frameworks across identity, taxonomy, and behavioral data, supporting the organization\'s shift toward audience-centric operations.',
+          'Drove cross-functional alignment across product, engineering, editorial, analytics, and business teams to scale audience infrastructure across five media brands.',
+        ],
+      },
+      {
+        label: 'Rich Data Audience Intelligence Product',
+        items: [
+          'Led the design of a scalable audience intelligence framework integrating zero-party and first-party data across hundreds of audience attributes.',
+          'Defined behavioral interpretation models that translated user interactions into commercially actionable audience insights and segmentation strategies.',
+          'Designed audience accumulation logic at the SDK layer, overcoming CDP overwrite limitations while reducing implementation complexity.',
+          'Coordinated cross-functional stakeholders to scale zero-party data collection initiatives across multiple media properties.',
+          'Established commercialization foundations supporting precision targeting, sponsored audience campaigns, DaaS initiatives, and future Data Clean Room integrations.',
+        ],
+      },
+      {
+        label: 'Analytics & Data Enablement',
+        items: [
+          'Co-led GA4 analytics architecture and centralized reporting frameworks to improve organization-wide data visibility and decision-making.',
+          'Served as an internal data partner across leadership, business, and product teams.',
+        ],
+      },
+    ],
+  },
+  {
+    role: 'Assistant Manager, Digital Operations',
+    company: 'CommonWealth Magazine — Learning Business Group',
+    period: '2022.02 — 2025.03',
+    groups: [
+      {
+        label: 'Content Operations & Growth Strategy',
+        items: [
+          'Led audience growth, content strategy, SEO, and digital operations across platforms reaching millions of monthly pageviews and nearly 1M social followers.',
+          'Improved website conversion rates from 0.16% to 0.3% through audience analysis, placement optimization, and A/B experimentation.',
+          'Led SEO strategy using Ahrefs and SimilarWeb, achieving P1 keyword ranking rate exceeding 50% within 3 months.',
+        ],
+      },
+      {
+        label: 'Cross-Functional Editorial Campaigns',
+        items: [
+          'Established scalable editorial curation workflows by coordinating cross-functional teams across engineering, design, editorial, and newsroom operations.',
+          'Led multiple award-nominated editorial initiatives and received recognition through the First Media Summit Editorial Award.',
+        ],
+      },
+    ],
+  },
+  {
+    role: 'Media & Public Relations',
+    company: 'National Human Rights Museum',
+    period: '2019.10 — 2022.01',
+    groups: [
+      {
+        label: '',
+        items: [
+          'Led public communication, media relations, and narrative strategy for museum initiatives and public engagement campaigns.',
+          'Translated complex human rights issues into accessible public narratives, with campaigns reaching 100K+ organic impressions.',
+          'Managed stakeholder communication across politically sensitive public issues.',
+        ],
+      },
+    ],
+  },
+];
+
+const skills = [
+  {
+    category: 'Technical',
+    items: ['GA4', 'Looker Studio', 'CDP (mParticle)', 'BigQuery SQL', 'n8n', 'ETL Pipelines', 'Taxonomy Design', 'Figma', 'Claude Code'],
+  },
+  {
+    category: 'Strategic',
+    items: ['Strategic Operations', 'Audience Intelligence', 'Stakeholder Management', 'Data Product Strategy', 'Cross-Functional Alignment', 'Operational Framework Design', 'Commercial Narrative', 'Problem Framing', 'Public Communication'],
+  },
+];
+---
+
+<Layout title="Resume — Tu, Wei-Hua" lang="en" page="resume">
+
+  <!-- Page header -->
+  <div class="pt-4 mb-12">
+    <p class="section-label mb-4">Resume</p>
+    <h1 class="text-5xl font-bold tracking-tight text-[#0a0a0a] leading-none">Experience <span class="text-zinc-300">經歷</span></h1>
+  </div>
+
+  <!-- Experience -->
+  <section class="mb-16">
+    <div class="rule-strong mb-0">
+      {experience.map((job, i) => (
+        <div class={`py-10 ${i < experience.length - 1 ? 'border-b border-zinc-100' : ''}`}>
+
+          <!-- Role header -->
+          <div class="flex flex-col md:flex-row md:items-baseline md:justify-between gap-1 mb-6">
+            <div>
+              <h2 class="text-xl font-semibold text-[#0a0a0a]">{job.role}</h2>
+              <p class="text-sm text-zinc-500 mt-0.5">{job.company}</p>
+            </div>
+            <span class="section-label whitespace-nowrap">{job.period}</span>
+          </div>
+
+          <!-- Grouped bullets -->
+          <div class="space-y-6">
+            {job.groups.map(group => (
+              <div>
+                {group.label && (
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-blue-600 mb-2.5">{group.label}</p>
+                )}
+                <ul class="space-y-2">
+                  {group.items.map(item => (
+                    <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
+                      <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section class="mb-16">
+    <div class="rule-strong">
+      <div class="py-8">
+        <p class="section-label mb-3">Education</p>
+        <p class="text-base font-semibold text-[#0a0a0a]">National Taiwan University</p>
+        <p class="text-sm text-zinc-500">M.A. in Anthropology</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section>
+    <div class="rule-strong">
+      <div class="py-8">
+        <p class="section-label mb-6">Skills</p>
+        <div class="space-y-5">
+          {skills.map(group => (
+            <div class="flex gap-6 items-start">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-400 w-20 shrink-0 pt-1">
+                {group.category}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                {group.items.map(skill => (
+                  <span class="px-3 py-1 text-xs font-medium border border-zinc-200 text-zinc-600 rounded-sm hover:border-zinc-400 transition-colors">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+</Layout>
