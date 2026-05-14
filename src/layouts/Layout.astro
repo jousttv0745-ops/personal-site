@@ -45,7 +45,10 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
     <!-- ── Mobile top bar (hidden on lg+) ── -->
     <header class="lg:hidden sticky top-0 z-50 bg-white border-b-2 border-[#0a0a0a] px-6 h-12 flex items-center justify-between">
       <a href={`${base}${lang}/about`}
-         class="text-xs font-semibold uppercase tracking-[0.12em] hover:text-blue-600 transition-colors">
+         class={[
+           'font-semibold uppercase hover:text-blue-600 transition-colors',
+           lang === 'en' ? 'text-[10px] tracking-[0.08em]' : 'text-xs tracking-[0.12em]',
+         ].join(' ')}>
         {displayName}
       </a>
       <div class="flex items-center gap-0">

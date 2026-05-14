@@ -224,15 +224,52 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 </Layout>
 
 <script>
+  // Expand / collapse cards
   document.querySelectorAll<HTMLButtonElement>('.project-card button').forEach(btn => {
     btn.addEventListener('click', () => {
       const expanded = btn.getAttribute('aria-expanded') === 'true';
       const panel = document.getElementById(btn.getAttribute('aria-controls')!);
       const chevron = btn.querySelector<HTMLElement>('.chevron');
-
       btn.setAttribute('aria-expanded', String(!expanded));
       panel?.classList.toggle('hidden', expanded);
       if (chevron) chevron.style.transform = expanded ? '' : 'rotate(180deg)';
+    });
+  });
+
+  // Lightbox
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.85); cursor:zoom-out;
+    align-items:center; justify-content:center;
+    transition:opacity 0.15s ease;
+  `;
+  const img = document.createElement('img');
+  img.style.cssText = 'max-width:90vw; max-height:90vh; object-fit:contain; border-radius:2px;';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+
+  function openLightbox(src: string, alt: string) {
+    img.src = src;
+    img.alt = alt;
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '0';
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+  }
+
+  function closeLightbox() {
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 150);
+  }
+
+  overlay.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  document.querySelectorAll<HTMLImageElement>('.detail-panel img').forEach(imgEl => {
+    imgEl.style.cursor = 'zoom-in';
+    imgEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(imgEl.src, imgEl.alt);
     });
   });
 </script>
