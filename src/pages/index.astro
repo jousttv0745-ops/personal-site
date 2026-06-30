@@ -1,4 +1,26 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
-return Astro.redirect(`${base}zh/about`);
 ---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Redirecting...</title>
+  </head>
+  <body>
+    <script is:inline define:vars={{ base }}>
+      const identityTokenPattern = /^#\/?(confirmation|invite|recovery|email_change)_token=/;
+      const destination = identityTokenPattern.test(window.location.hash)
+        ? `${base}studio/${window.location.hash}`
+        : `${base}zh/about/`;
+
+      window.location.replace(destination);
+    </script>
+    <p>
+      Redirecting to <a href={`${base}zh/about/`}>the personal site</a>.
+    </p>
+  </body>
+</html>

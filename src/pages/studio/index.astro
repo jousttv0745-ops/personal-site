@@ -193,7 +193,10 @@ const studioData = {
         identity.on('init', (user) => {
           state.authReady = true;
           state.user = identityUser(user);
-          if (openIdentityRoute(identity)) return;
+          if (openIdentityRoute(identity)) {
+            render();
+            return;
+          }
           render();
         });
 
