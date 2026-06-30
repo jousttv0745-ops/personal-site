@@ -8,20 +8,17 @@
   "toolsLabel": "Tools / Stack",
   "projects": [
     {
-      "id": "keyword",
-      "order": 10,
-      "status": "published",
-      "featured": true,
-      "title": "High-Potential Ad Keyword Selection Tool",
-      "category": "Internal Tool",
-      "summary": "Built with Claude skill + Looker Studio to help ad sales, planners, and marketing teams query site traffic data, auto-shortlist high-potential keywords, and generate GAM targeting lists with placement recommendations — significantly reducing manual prep time.",
-      "role": "Owner",
       "outcomes": [
         "Ops time cut by 60%",
         "Adopted by more than 2 departments"
       ],
-      "tools": ["SQL", "Looker Studio", "Claude API"],
+      "summary": "Built with Claude skill + Looker Studio to help ad sales, planners, and marketing teams query site traffic data, auto-shortlist high-potential keywords, and generate GAM targeting lists with placement recommendations — significantly reducing manual prep time.",
+      "featured": true,
+      "order": 10,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [],
+      "title": "High-Potential Ad Keyword Selection Tool",
       "images": [
         {
           "src": "assets/keyword-demo-1.png",
@@ -33,44 +30,52 @@
           "alt": "Claude AI conversation generating ad keyword targeting plan",
           "caption": "Step 2 — Claude AI"
         }
-      ]
+      ],
+      "id": "keyword",
+      "tools": [
+        "SQL",
+        "Looker Studio",
+        "Claude API"
+      ],
+      "category": "Internal Tool"
     },
     {
-      "id": "ops",
-      "order": 20,
-      "status": "published",
-      "featured": false,
-      "title": "Building a Digital-First Editorial Operating Model",
-      "category": "Process Design",
-      "summary": "Led the redesign of the digital editorial production workflow by coordinating editorial, design, engineering, social media, and newsroom teams — shifting the organization toward a digital-first content operating model centered on user experience.",
-      "role": "Owner",
       "outcomes": [
         "Established cross-functional production workflow and fixed delivery cadence",
         "Consistent quarterly delivery: 1 large + 1 small digital editorial campaign"
       ],
-      "tools": ["Cross-Functional Coordination", "Workflow Design", "Editorial Strategy", "Project Management"],
+      "summary": "Led the redesign of the digital editorial production workflow by coordinating editorial, design, engineering, social media, and newsroom teams — shifting the organization toward a digital-first content operating model centered on user experience.",
+      "featured": false,
+      "order": 20,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [],
+      "title": "Building a Digital-First Editorial Operating Model",
       "images": [
         {
           "src": "assets/ops-demo-1.png",
           "alt": "Digital editorial production cycle and quarterly schedule planning chart",
           "caption": "Production Cycle & Quarterly Schedule"
         }
-      ]
+      ],
+      "id": "ops",
+      "tools": [
+        "Cross-Functional Coordination",
+        "Workflow Design",
+        "Editorial Strategy",
+        "Project Management"
+      ],
+      "category": "Process Design"
     },
     {
-      "id": "web",
-      "order": 30,
-      "status": "published",
-      "featured": false,
-      "title": "Website Redesign Projects",
-      "category": "Project Management",
-      "summary": "Led planning and project management for two website redesigns, covering brand visual refresh, UX optimization, new feature development, and content strategy.",
-      "role": "Owner",
       "outcomes": [
         "Both redesigns launched on schedule"
       ],
-      "tools": ["Project Management", "Brand Strategy", "SEO", "UX Planning", "Design-Dev Coordination", "Figma"],
+      "summary": "Led planning and project management for two website redesigns, covering brand visual refresh, UX optimization, new feature development, and content strategy.",
+      "featured": false,
+      "order": 30,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [
         {
           "label": "National Human Rights Museum — Official Website Redesign",
@@ -81,6 +86,7 @@
           "text": "Covered content agenda-setting, advocacy review, and new feature development (2024/11–2025/03). Drove SEO improvements, dedicated page planning and design-development, and overall content experience optimization."
         }
       ],
+      "title": "Website Redesign Projects",
       "images": [
         {
           "src": "assets/web-demo-1.png",
@@ -92,7 +98,49 @@
           "alt": "Talent in Taiwan project page",
           "caption": "Talent, in Taiwan"
         }
-      ]
+      ],
+      "id": "web",
+      "tools": [
+        "Project Management",
+        "Brand Strategy",
+        "SEO",
+        "UX Planning",
+        "Design-Dev Coordination",
+        "Figma"
+      ],
+      "category": "Project Management"
+    },
+    {
+      "outcomes": [
+        "Reduced repetitive PM effort across market research, PRD drafting, project review, and task decomposition, with time savings measurable through weekly review and ticket creation cycles",
+        "Turned PRD, Schema, Vocabulary, and SDK specifications into version-controlled assets in GitHub, making product decisions traceable and reviewable"
+      ],
+      "summary": "For the TVBS Rich Data project, I designed an AI-assisted, human-governed product workflow that integrates AI into market sensing, product specification, planning-to-execution handoff, project execution, and behavior labeling validation. AI supported trend monitoring, Schema / Vocabulary design, SDK logic exploration, and PRD drafting, while GitHub and Claude Code were used to turn versioned product specs into traceable ticket / issue drafts. The workflow keeps the PM as the decision owner, using CLAUDE.md, GitHub version control, and labeling accuracy thresholds to ensure that AI outputs remain reviewable, correctable, and tied to product iteration.",
+      "featured": true,
+      "order": 1,
+      "status": "published",
+      "role": "Owner",
+      "title": "AI-Native Workflow for Rich Data Product Development",
+      "images": [
+        {
+          "src": "/uploads/tvbs-rich-data-ai-workflow-en.png",
+          "alt": "AI-Native Workflow for Rich Data Product Development",
+          "caption": "AI-Native Workflow for Rich Data Product Development"
+        }
+      ],
+      "id": "aiflow",
+      "tools": [
+        "Claude",
+        "Claude Code",
+        "Codex",
+        "Hermes",
+        "GitHub",
+        "Clickup",
+        "Antigravity",
+        "Prompt Design",
+        "Human-in-the-loop Review"
+      ],
+      "category": "Process Design"
     }
   ]
 }
