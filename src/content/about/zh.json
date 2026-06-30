@@ -1,0 +1,28 @@
+{
+  "title": "關於我 — 杜韋樺",
+  "sectionLabel": "About",
+  "name": "杜韋樺",
+  "bio": "具有人類學研究背景，過往經歷橫跨媒體、公共溝通、內容營運，擅長在高度模糊與跨功能環境中，將複雜商業需求轉化為可規模化的數據、流程與組織運作架構。現於大型媒體集團專注於數據變現策略規劃，協調產品、業務、工程、分析與內容團隊，推動跨產品數據治理。",
+  "awardsLabel": "獎項 Awards",
+  "awards": [
+    {
+      "role": "製片",
+      "description": "《踮腳尖》— 入圍第 69 屆柏林影展 K-Plus 兒童短片競賽單元"
+    },
+    {
+      "role": "製作助理",
+      "description": "《日常對話》— 獲第 67 屆柏林影展泰迪熊獎，代表台灣角逐第 90 屆奧斯卡金像獎最佳外語片"
+    }
+  ],
+  "availabilityLabel": "求職狀態",
+  "availability": [
+    "歡迎全職",
+    "Open to Full-time"
+  ],
+  "contactLabel": "聯絡 Contact",
+  "contact": {
+    "location": "Taipei, Taiwan",
+    "email": "jousttv0745@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/wei-hua-tu-b9049099/"
+  }
+}

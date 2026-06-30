@@ -1,66 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AboutPage from '../../components/AboutPage.astro';
+import content from '../../content/about/zh.json';
 ---
 
-<Layout title="關於我 — 杜韋樺" lang="zh" page="about">
-
-  <!-- Name -->
-  <div class="mb-3">
-    <p class="section-label mb-4">About</p>
-    <h1 class="text-6xl font-bold tracking-tight leading-none">杜韋樺</h1>
-  </div>
-
-  <div class="rule-strong mt-8 mb-10"></div>
-
-  <!-- Bio -->
-  <p class="text-base text-zinc-600 leading-relaxed max-w-2xl mb-10">
-    具有人類學研究背景，過往經歷橫跨媒體、公共溝通、內容營運，擅長在高度模糊與跨功能環境中，將複雜商業需求轉化為可規模化的數據、流程與組織運作架構。現於大型媒體集團專注於數據變現策略規劃，協調產品、業務、工程、分析與內容團隊，推動跨產品數據治理。
-  </p>
-
-  <!-- Awards -->
-  <div class="mb-16">
-    <p class="section-label mb-4">獎項 Awards</p>
-    <ul class="space-y-3 max-w-2xl">
-      <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
-        <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
-        <span><span class="font-medium text-[#0a0a0a]">製片</span>，《踮腳尖》— 入圍第 69 屆柏林影展 K-Plus 兒童短片競賽單元</span>
-      </li>
-      <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
-        <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
-        <span><span class="font-medium text-[#0a0a0a]">製作助理</span>，《日常對話》— 獲第 67 屆柏林影展泰迪熊獎，代表台灣角逐第 90 屆奧斯卡金像獎最佳外語片</span>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Two-column info grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 border-t-2 border-[#0a0a0a]">
-
-    <div class="py-8 md:border-r border-zinc-200 md:pr-10">
-      <p class="section-label mb-4">求職狀態</p>
-      <p class="text-sm font-semibold text-[#0a0a0a]">歡迎全職</p>
-      <p class="text-sm text-zinc-500">Open to Full-time</p>
-    </div>
-
-    <div class="py-8 border-t-2 md:border-t-0 border-[#0a0a0a] md:pl-10">
-      <p class="section-label mb-4">聯絡 Contact</p>
-      <ul class="space-y-1.5 text-sm">
-        <li class="text-zinc-500">Taipei, Taiwan</li>
-        <li>
-          <a href="mailto:jousttv0745@gmail.com"
-             class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
-            jousttv0745@gmail.com
-          </a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/wei-hua-tu-b9049099/"
-             target="_blank" rel="noopener"
-             class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
-            LinkedIn →
-          </a>
-        </li>
-      </ul>
-    </div>
-
-  </div>
-
+<Layout title={content.title} lang="zh" page="about">
+  <AboutPage content={content} />
 </Layout>

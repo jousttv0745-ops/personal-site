@@ -1,0 +1,27 @@
+{
+  "title": "About — Tu, Wei-Hua",
+  "sectionLabel": "About",
+  "name": "Tu, Wei-Hua",
+  "bio": "Anthropologist-turned strategist focused on audience infrastructure, behavioral systems, and data monetization. Experienced in translating complex business and user behavior into scalable operational and cross-functional frameworks across media and digital platforms.",
+  "awardsLabel": "Awards",
+  "awards": [
+    {
+      "role": "Producer",
+      "description": "Tiptoe (踮腳尖), nominated for K-Plus Children's Short Film Competition, 69th Berlin International Film Festival"
+    },
+    {
+      "role": "Production Assistant",
+      "description": "Small Talk (日常對話), Teddy Award, 67th Berlin International Film Festival; Taiwan's submission for Best Foreign Language Film, 90th Academy Awards"
+    }
+  ],
+  "availabilityLabel": "Availability",
+  "availability": [
+    "Open to Full-time"
+  ],
+  "contactLabel": "聯絡 Contact",
+  "contact": {
+    "location": "Taipei, Taiwan",
+    "email": "jousttv0745@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/wei-hua-tu-b9049099/"
+  }
+}

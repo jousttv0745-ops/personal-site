@@ -1,0 +1,203 @@
+---
+interface ProjectDescription {
+  label: string;
+  text: string;
+}
+
+interface ProjectImage {
+  src: string;
+  alt: string;
+  caption: string;
+}
+
+interface Project {
+  id: string;
+  order: number;
+  status: 'draft' | 'published';
+  featured: boolean;
+  title: string;
+  category: string;
+  summary: string;
+  role: string;
+  outcomes: string[];
+  tools: string[];
+  descriptions: ProjectDescription[];
+  images: ProjectImage[];
+}
+
+interface Content {
+  sectionLabel: string;
+  heading: string;
+  headingMuted: string;
+  roleLabel: string;
+  outcomesLabel: string;
+  toolsLabel: string;
+  projects: Project[];
+}
+
+const { content } = Astro.props as { content: Content };
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const projects = content.projects
+  .filter((project) => project.status === 'published')
+  .sort((a, b) => {
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
+    return a.order - b.order;
+  });
+
+const imageUrl = (src: string) => {
+  if (src.startsWith('http') || src.startsWith('/')) return src;
+  return `${base}${src}`;
+};
+---
+
+<div class="pt-4 mb-12">
+  <p class="section-label mb-4">{content.sectionLabel}</p>
+  <h1 class="text-5xl font-bold tracking-tight text-[#0a0a0a] leading-none">
+    {content.heading}
+    {content.headingMuted && <span class="text-zinc-300"> {content.headingMuted}</span>}
+  </h1>
+</div>
+
+<div class="rule-strong">
+  {projects.map((project, index) => (
+    <div class={`project-card ${index > 0 ? 'border-t border-zinc-100' : ''}`}>
+      <button
+        class="w-full text-left py-8 flex items-start justify-between gap-6 group"
+        aria-expanded="false"
+        aria-controls={`detail-${project.id}`}
+      >
+        <div class="flex items-start gap-6 flex-1 min-w-0">
+          <span class="section-label pt-1 shrink-0 w-6">{String(index + 1).padStart(2, '0')}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-1.5 flex-wrap">
+              <h3 class="text-lg font-semibold text-[#0a0a0a] group-hover:text-blue-600 transition-colors">
+                {project.title}
+              </h3>
+              <span class="text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-400 border border-zinc-200 px-2 py-0.5 rounded-sm shrink-0">
+                {project.category}
+              </span>
+            </div>
+            <p class="text-sm text-zinc-500 leading-relaxed">
+              {project.summary}
+            </p>
+          </div>
+        </div>
+        <span class="chevron mt-1 text-zinc-300 shrink-0 transition-transform duration-200">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+
+      <div id={`detail-${project.id}`} class="detail-panel hidden pb-10 pl-12 border-t border-zinc-100">
+        {project.descriptions.length > 0 && (
+          <div class="mt-6 mb-8 space-y-4">
+            {project.descriptions.map((description) => (
+              <div>
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-[0.1em] mb-1.5">{description.label}</p>
+                <p class="text-sm text-zinc-600 leading-relaxed">
+                  {description.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <p class="section-label mb-3">{content.roleLabel}</p>
+            <p class="text-sm text-zinc-600 leading-relaxed">{project.role}</p>
+          </div>
+
+          <div>
+            <p class="section-label mb-3">{content.outcomesLabel}</p>
+            <ul class="space-y-2">
+              {project.outcomes.map((outcome) => (
+                <li class="flex items-start gap-3 text-sm text-zinc-600">
+                  <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
+                  {outcome}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p class="section-label mb-3">{content.toolsLabel}</p>
+            <div class="flex flex-wrap gap-2">
+              {project.tools.map((tool) => (
+                <span class="px-2.5 py-1 text-xs font-medium border border-zinc-200 text-zinc-600 rounded-sm">{tool}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {project.images.length > 0 && (
+          <div class="grid grid-cols-2 gap-3 mt-8">
+            {project.images.map((image) => (
+              <div class="rounded-sm overflow-hidden border border-zinc-200">
+                <div class="px-3 py-1.5 bg-zinc-50 border-b border-zinc-200">
+                  <span class="section-label">{image.caption}</span>
+                </div>
+                <img
+                  src={imageUrl(image.src)}
+                  alt={image.alt}
+                  class="w-full object-cover"
+                  onerror="this.closest('.rounded-sm').style.display='none'"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.project-card button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      const panel = document.getElementById(btn.getAttribute('aria-controls')!);
+      const chevron = btn.querySelector<HTMLElement>('.chevron');
+      btn.setAttribute('aria-expanded', String(!expanded));
+      panel?.classList.toggle('hidden', expanded);
+      if (chevron) chevron.style.transform = expanded ? '' : 'rotate(180deg)';
+    });
+  });
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.85); cursor:zoom-out;
+    align-items:center; justify-content:center;
+    transition:opacity 0.15s ease;
+  `;
+  const img = document.createElement('img');
+  img.style.cssText = 'max-width:90vw; max-height:90vh; object-fit:contain; border-radius:2px;';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+
+  function openLightbox(src: string, alt: string) {
+    img.src = src;
+    img.alt = alt;
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '0';
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+  }
+
+  function closeLightbox() {
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 150);
+  }
+
+  overlay.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  document.querySelectorAll<HTMLImageElement>('.detail-panel img').forEach(imgEl => {
+    imgEl.style.cursor = 'zoom-in';
+    imgEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(imgEl.src, imgEl.alt);
+    });
+  });
+</script>
