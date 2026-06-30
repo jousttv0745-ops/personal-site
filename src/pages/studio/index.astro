@@ -32,6 +32,7 @@ const studioData = {
     <script define:vars={{ studioData }}>
       window.__STUDIO_DATA__ = studioData;
     </script>
+    <script is:inline src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <script type="module">
       const root = document.getElementById('studio-root');
@@ -48,6 +49,8 @@ const studioData = {
         saving: false,
         message: 'Ready',
         messageType: 'neutral',
+        authReady: false,
+        user: null,
         query: '',
         statusFilter: 'all',
         sortMode: 'order',
@@ -96,6 +99,90 @@ const studioData = {
 
       const validateProjectId = (id) => /^[a-z0-9-]+$/.test(id);
 
+      const netlifyIdentity = () => window.netlifyIdentity;
+
+      const identityUser = (user) => {
+        if (!user) return null;
+        return {
+          email: user.email || user.user_metadata?.email || '',
+          name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+        };
+      };
+
+      const openLogin = () => {
+        const identity = netlifyIdentity();
+        if (!identity) {
+          setMessage('Netlify Identity is not available on this deploy.', 'error');
+          render();
+          return;
+        }
+        identity.open('login');
+      };
+
+      const logout = () => {
+        const identity = netlifyIdentity();
+        if (!identity) return;
+        identity.logout();
+      };
+
+      const authHeaders = async () => {
+        const identity = netlifyIdentity();
+        if (!identity) throw new Error('Netlify Identity is not available on this deploy.');
+
+        const user = identity.currentUser();
+        if (!user) {
+          identity.open('login');
+          throw new Error('Please log in before saving or publishing.');
+        }
+
+        const token = typeof user.jwt === 'function' ? await user.jwt() : user.token?.access_token;
+        if (!token) throw new Error('Login token is unavailable. Please log out and log in again.');
+
+        state.user = identityUser(user);
+        return { authorization: `Bearer ${token}` };
+      };
+
+      const initAuth = (attempt = 0) => {
+        const identity = netlifyIdentity();
+        if (!identity) {
+          if (attempt < 20) {
+            window.setTimeout(() => initAuth(attempt + 1), 150);
+            return;
+          }
+          state.authReady = true;
+          setMessage('Netlify Identity widget did not load.', 'error');
+          render();
+          return;
+        }
+
+        identity.on('init', (user) => {
+          state.authReady = true;
+          state.user = identityUser(user);
+          render();
+        });
+
+        identity.on('login', (user) => {
+          state.authReady = true;
+          state.user = identityUser(user);
+          identity.close();
+          setMessage(`Logged in as ${state.user?.email || 'admin'}.`, 'success');
+          render();
+        });
+
+        identity.on('logout', () => {
+          state.user = null;
+          setMessage('Logged out.', 'neutral');
+          render();
+        });
+
+        identity.on('error', (error) => {
+          setMessage(error?.message || 'Netlify Identity login failed.', 'error');
+          render();
+        });
+
+        identity.init();
+      };
+
       const validatePortfolio = (portfolio) => {
         const ids = new Set();
         for (const project of portfolio.projects ?? []) {
@@ -133,6 +220,15 @@ const studioData = {
           return;
         }
 
+        let headers;
+        try {
+          headers = await authHeaders();
+        } catch (error) {
+          setMessage(error.message, 'error');
+          render();
+          return;
+        }
+
         state.saving = true;
         setMessage('Saving draft to GitHub branch...', 'neutral');
         render();
@@ -140,7 +236,7 @@ const studioData = {
         try {
           const response = await fetch(apiPath(kind), {
             method: 'PUT',
-            headers: { 'content-type': 'application/json' },
+            headers: { 'content-type': 'application/json', ...headers },
             body: JSON.stringify(payload),
           });
           const result = await response.json().catch(() => ({}));
@@ -148,7 +244,7 @@ const studioData = {
           state.dirty = false;
           setMessage(result.previewUrl ? `Draft saved. Preview: ${result.previewUrl}` : 'Draft saved.', 'success');
         } catch (error) {
-          setMessage(`${error.message}. Configure Netlify Functions and GitHub token before saving.`, 'error');
+          setMessage(error.message, 'error');
         } finally {
           state.saving = false;
           render();
@@ -156,20 +252,29 @@ const studioData = {
       };
 
       const publishCurrent = async () => {
+        let headers;
+        try {
+          headers = await authHeaders();
+        } catch (error) {
+          setMessage(error.message, 'error');
+          render();
+          return;
+        }
+
         state.saving = true;
         setMessage('Preparing publish PR...', 'neutral');
         render();
         try {
           const response = await fetch('/.netlify/functions/publish', {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
+            headers: { 'content-type': 'application/json', ...headers },
             body: JSON.stringify({ locale: state.locale, kind: state.section }),
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.message || 'Publish PR failed');
           setMessage(result.prUrl ? `Publish PR ready: ${result.prUrl}` : 'Publish PR ready.', 'success');
         } catch (error) {
-          setMessage(`${error.message}. Publish requires Netlify Functions and GitHub token.`, 'error');
+          setMessage(error.message, 'error');
         } finally {
           state.saving = false;
           render();
@@ -398,6 +503,10 @@ const studioData = {
                   <option value="en" ${state.locale === 'en' ? 'selected' : ''}>English</option>
                 </select>
                 <span class="${classNames('status-pill', `is-${state.messageType}`)}">${escapeHtml(state.saving ? 'Working...' : state.message)}</span>
+                <div class="auth-controls">
+                  <span class="${classNames('auth-chip', state.user && 'is-signed-in')}">${escapeHtml(state.authReady ? state.user?.email || 'Not signed in' : 'Checking login...')}</span>
+                  <button class="secondary-button auth-button" data-action="${state.user ? 'logout' : 'login'}">${state.user ? 'Log out' : 'Log in'}</button>
+                </div>
               </div>
             </header>
             ${content}
@@ -693,6 +802,8 @@ const studioData = {
             const action = button.dataset.action;
             if (action === 'save') saveCurrent();
             if (action === 'publish') publishCurrent();
+            if (action === 'login') openLogin();
+            if (action === 'logout') logout();
             if (action === 'add-project') addProject();
             if (action === 'remove-project') removeProject();
             if (action === 'add-experience') addExperience();
@@ -835,6 +946,7 @@ const studioData = {
       };
 
       render();
+      initAuth();
     </script>
 
     <style is:global>
@@ -998,17 +1110,50 @@ const studioData = {
       }
 
       .status-pill {
+        max-width: 360px;
         border-radius: 999px;
         padding: 8px 12px;
         background: #eef1f7;
         color: #3d4353;
         font-size: 13px;
         font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .status-pill.is-success { background: #e5f4ea; color: #137333; }
       .status-pill.is-warning { background: #fff5d7; color: #8a5a00; }
       .status-pill.is-error { background: #fce8e6; color: #c5221f; }
+
+      .auth-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .auth-chip {
+        max-width: 220px;
+        overflow: hidden;
+        border: 1px solid #dce1ec;
+        border-radius: 999px;
+        padding: 8px 12px;
+        color: #5f6677;
+        font-size: 12px;
+        font-weight: 750;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .auth-chip.is-signed-in {
+        border-color: #b8d8c2;
+        background: #e5f4ea;
+        color: #137333;
+      }
+
+      .auth-button {
+        white-space: nowrap;
+      }
 
       .workspace {
         padding: 36px 32px 64px;
@@ -1384,6 +1529,19 @@ const studioData = {
         .studio-sidebar {
           position: relative;
           height: auto;
+        }
+
+        .studio-topbar,
+        .topbar-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .search-input,
+        .status-pill,
+        .auth-chip {
+          width: 100%;
+          max-width: none;
         }
 
         .portfolio-grid,
