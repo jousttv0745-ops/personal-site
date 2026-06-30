@@ -21,21 +21,36 @@ Set these in Netlify project settings before enabling write actions:
 | `NETLIFY_SITE_NAME` | Netlify site subdomain, used to construct deploy preview URLs. |
 | `PUBLIC_SITE_URL` | Optional. Defaults to `https://jousttv0745-ops.github.io/personal-site`. |
 
+## Required Netlify Identity Setup
+
+Studio Admin uses Netlify Identity for the admin login and Netlify Functions for the GitHub write operations.
+
+1. Open the Netlify project.
+2. Go to `Project configuration` -> `Identity`.
+3. Enable Identity if it is not enabled yet.
+4. Set registration to invite-only if the option is available.
+5. Invite the admin email address that is listed in `ADMIN_ALLOWED_EMAILS`.
+6. Accept the invite and set a password for that Netlify Identity user.
+7. Open `/studio/`, click `Log in`, and sign in with that email address.
+
+The email address in Netlify Identity must match one of the comma-separated values in `ADMIN_ALLOWED_EMAILS`.
+
 ## MVP Publish Flow
 
 1. Edit content in `/studio/`.
 2. Click `Save Changes`.
-3. Studio Admin writes JSON changes to a draft branch such as `cms/draft-portfolio-zh`.
-4. Studio Admin creates or updates a draft PR.
-5. Use the PR/deploy preview to review the site.
-6. Click `Publish Site` to prepare the publish PR.
-7. Manually merge the PR on GitHub.
-8. GitHub Pages deploys the public site at the existing URL.
+3. Studio Admin checks the Netlify Identity login token and admin allowlist.
+4. Studio Admin writes JSON changes to a draft branch such as `cms/draft-portfolio-zh`.
+5. Studio Admin creates or updates a draft PR.
+6. Use the PR/deploy preview to review the site.
+7. Click `Publish Site` to prepare the publish PR.
+8. Manually merge the PR on GitHub.
+9. GitHub Pages deploys the public site at the existing URL.
 
 ## Security Notes
 
 - `GITHUB_TOKEN` must only live in Netlify environment variables.
 - The token must never be exposed to browser code.
-- Write APIs require an authenticated Netlify user whose email is listed in `ADMIN_ALLOWED_EMAILS`.
+- Write APIs require an authenticated Netlify Identity user whose email is listed in `ADMIN_ALLOWED_EMAILS`.
 - If authentication is not configured, the Studio UI still loads in read-only/local-edit mode, but Save/Publish will return setup guidance.
-
+- The browser sends only the Netlify Identity login token to the Functions. The GitHub token remains server-side.
