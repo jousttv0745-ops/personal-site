@@ -35,7 +35,7 @@ Studio Admin uses Netlify Identity for the admin login and Netlify Functions for
 
 The email address in Netlify Identity must match one of the comma-separated values in `ADMIN_ALLOWED_EMAILS`.
 
-If an invite email links to the site root, copy the invite URL and change only the path before the hash:
+If an invite email links to the site root, the root page redirects identity tokens to Studio Admin automatically. You can also copy the invite URL and change only the path before the hash:
 
 ```txt
 https://bucolic-pothos-6a8d26.netlify.app/studio/#invite_token=...
