@@ -30,10 +30,16 @@ Studio Admin uses Netlify Identity for the admin login and Netlify Functions for
 3. Enable Identity if it is not enabled yet.
 4. Set registration to invite-only if the option is available.
 5. Invite the admin email address that is listed in `ADMIN_ALLOWED_EMAILS`.
-6. Accept the invite and set a password for that Netlify Identity user.
-7. Open `/studio/`, click `Log in`, and sign in with that email address.
+6. Accept the invite from `/studio/#invite_token=...`; Studio Admin opens the invite password setup flow automatically.
+7. After setting a password, open `/studio/`, click `Log in`, and sign in with that email address.
 
 The email address in Netlify Identity must match one of the comma-separated values in `ADMIN_ALLOWED_EMAILS`.
+
+If an invite email links to the site root, copy the invite URL and change only the path before the hash:
+
+```txt
+https://bucolic-pothos-6a8d26.netlify.app/studio/#invite_token=...
+```
 
 ## MVP Publish Flow
 

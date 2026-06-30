@@ -101,6 +101,20 @@ const studioData = {
 
       const netlifyIdentity = () => window.netlifyIdentity;
 
+      const identityRouteFromHash = () => {
+        const hash = window.location.hash.replace(/^#\/?/, '');
+        const match = hash.match(/^(confirmation|invite|recovery|email_change)_token=([^&]+)/);
+        if (!match) return null;
+        return {
+          type: match[1],
+          token: decodeURIComponent(match[2]),
+        };
+      };
+
+      const clearIdentityHash = () => {
+        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+      };
+
       const identityUser = (user) => {
         if (!user) return null;
         return {
@@ -142,6 +156,27 @@ const studioData = {
         return { authorization: `Bearer ${token}` };
       };
 
+      const openIdentityRoute = (identity) => {
+        const route = identityRouteFromHash();
+        if (!route) return false;
+
+        if (identity.store?.verifyToken) {
+          identity.store.verifyToken(route.type, route.token);
+          clearIdentityHash();
+          const labels = {
+            confirmation: 'Confirming email...',
+            invite: 'Complete your invite by setting a password.',
+            recovery: 'Reset your password to continue.',
+            email_change: 'Confirming email change...',
+          };
+          setMessage(labels[route.type] || 'Completing Identity flow...', 'neutral');
+          return true;
+        }
+
+        setMessage('Netlify Identity token flow is unavailable. Please refresh this invite link.', 'error');
+        return false;
+      };
+
       const initAuth = (attempt = 0) => {
         const identity = netlifyIdentity();
         if (!identity) {
@@ -158,6 +193,7 @@ const studioData = {
         identity.on('init', (user) => {
           state.authReady = true;
           state.user = identityUser(user);
+          if (openIdentityRoute(identity)) return;
           render();
         });
 
