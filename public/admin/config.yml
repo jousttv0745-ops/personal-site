@@ -11,8 +11,9 @@ publish_mode: editorial_workflow
 media_folder: public/uploads
 public_folder: /uploads
 
-site_url: /
-display_url: /
+site_url: https://jousttv0745-ops.github.io/personal-site
+display_url: https://jousttv0745-ops.github.io/personal-site
+show_preview_links: true
 logo_url: /favicon.svg
 
 collections:
@@ -83,118 +84,152 @@ collections:
               - { label: LinkedIn URL, name: linkedin, widget: string }
 
   - name: resume
-    label: Resume
+    label: 履歷 Resume
     editor:
       preview: false
     files:
-      - label: Resume - Chinese
+      - label: 中文履歷
         name: resume_zh
         file: src/content/resume/zh.json
+        preview_path: zh/resume
         format: json
         fields: &resume_fields
-          - { label: Page Title, name: title, widget: string }
-          - { label: Section Label, name: sectionLabel, widget: string }
-          - { label: Heading, name: heading, widget: string }
-          - { label: Muted Heading, name: headingMuted, widget: string, required: false }
-          - label: Experience
+          - { label: SEO 標題, name: title, widget: string }
+          - { label: 區塊小標, name: sectionLabel, widget: string }
+          - { label: 頁面主標, name: heading, widget: string }
+          - { label: 灰色副標, name: headingMuted, widget: string, required: false }
+          - label: 工作經歷 Experience
             name: experience
             widget: list
-            summary: "{{fields.role}} — {{fields.company}}"
+            collapsed: false
+            label_singular: 工作經歷
+            summary: "{{fields.period}}｜{{fields.role}} — {{fields.company}}"
+            hint: 每一條 Experience 會對應履歷頁上的一段工作經歷。預設展開，方便同時檢查職稱、公司、期間與 bullet 群組。
             fields:
-              - { label: Role, name: role, widget: string }
-              - { label: Company, name: company, widget: string }
-              - { label: Period, name: period, widget: string }
-              - label: Groups
+              - { label: 職稱 Role, name: role, widget: string }
+              - { label: 公司 Company, name: company, widget: string }
+              - { label: 期間 Period, name: period, widget: string }
+              - label: 段落群組 Groups
                 name: groups
                 widget: list
+                collapsed: false
+                label_singular: 群組
                 summary: "{{fields.label}}"
+                hint: 用來把同一段經歷中的 bullet 分組；不需要顯示群組標題時，Group Label 可以留空。
                 fields:
-                  - { label: Group Label, name: label, widget: string, required: false }
-                  - label: Bullets
+                  - { label: 群組標題 Group Label, name: label, widget: string, required: false }
+                  - label: 重點條列 Bullets
                     name: items
                     widget: list
+                    collapsed: false
+                    label_singular: bullet
                     field: { label: Bullet, name: bullet, widget: text }
-          - label: Education
+          - label: 學歷 Education
             name: education
             widget: object
             fields:
-              - { label: Label, name: label, widget: string }
-              - { label: School, name: school, widget: string }
-              - { label: Degree, name: degree, widget: string }
-          - { label: Skills Label, name: skillsLabel, widget: string }
-          - label: Skills
+              - { label: 區塊標籤 Label, name: label, widget: string }
+              - { label: 學校 School, name: school, widget: string }
+              - { label: 學位 Degree, name: degree, widget: string }
+          - { label: 技能區塊標題 Skills Label, name: skillsLabel, widget: string }
+          - label: 技能 Skills
             name: skills
             widget: list
+            collapsed: false
+            label_singular: 技能分類
             summary: "{{fields.category}}"
             fields:
-              - { label: Category, name: category, widget: string }
-              - label: Items
+              - { label: 分類 Category, name: category, widget: string }
+              - label: 技能項目 Items
                 name: items
                 widget: list
+                collapsed: false
+                label_singular: skill
                 field: { label: Skill, name: skill, widget: string }
-      - label: Resume - English
+      - label: 英文履歷
         name: resume_en
         file: src/content/resume/en.json
+        preview_path: en/resume
         format: json
         fields: *resume_fields
 
   - name: portfolio
-    label: Portfolio
+    label: 作品集 Portfolio
     editor:
       preview: false
     files:
-      - label: Portfolio - Chinese
+      - label: 中文作品集
         name: portfolio_zh
         file: src/content/portfolio/zh.json
+        preview_path: zh/portfolio
         format: json
         fields: &portfolio_fields
-          - { label: Page Title, name: title, widget: string }
-          - { label: Section Label, name: sectionLabel, widget: string }
-          - { label: Heading, name: heading, widget: string }
-          - { label: Muted Heading, name: headingMuted, widget: string, required: false }
-          - { label: Role Label, name: roleLabel, widget: string }
-          - { label: Outcomes Label, name: outcomesLabel, widget: string }
-          - { label: Tools Label, name: toolsLabel, widget: string }
-          - label: Projects
+          - { label: SEO 標題, name: title, widget: string }
+          - { label: 區塊小標, name: sectionLabel, widget: string }
+          - { label: 頁面主標, name: heading, widget: string }
+          - { label: 灰色副標, name: headingMuted, widget: string, required: false }
+          - { label: 角色欄位標題 Role Label, name: roleLabel, widget: string }
+          - { label: 成果欄位標題 Outcomes Label, name: outcomesLabel, widget: string }
+          - { label: 工具欄位標題 Tools Label, name: toolsLabel, widget: string }
+          - label: 作品項目 Projects
             name: projects
             widget: list
-            summary: "{{fields.order}}. {{fields.title}}"
+            collapsed: false
+            label_singular: 作品
+            summary: "{{fields.order}}｜{{fields.status}}｜{{fields.title}}"
+            hint: 每一條 Project 會對應作品集頁上的一個作品。預設展開，方便同時檢查 Title、Category、Summary、Outcome 與 Tool。
             fields:
-              - { label: ID, name: id, widget: string, hint: "Used for the accordion panel id. Keep lowercase and unique." }
-              - { label: Display Order, name: order, widget: number, value_type: int, default: 100 }
-              - { label: Status, name: status, widget: select, options: ["draft", "published"], default: published }
-              - { label: Featured, name: featured, widget: boolean, default: false }
-              - { label: Title, name: title, widget: string }
-              - { label: Category, name: category, widget: string }
-              - { label: Summary, name: summary, widget: text }
-              - { label: Role, name: role, widget: string }
-              - label: Outcomes
+              - { label: ID, name: id, widget: string, hint: "前台手風琴區塊會使用這個 ID。建議使用小寫英文、數字與連字號，例如 rich-data-workflow。", pattern: ["^[a-z0-9-]+$", "請使用小寫英文、數字與連字號，不要使用空白或中文。"] }
+              - { label: 顯示順序 Display Order, name: order, widget: number, value_type: int, default: 100, min: 1, hint: 數字越小越前面；置頂作品會優先排在一般作品之前。 }
+              - label: 狀態 Status
+                name: status
+                widget: select
+                options:
+                  - { label: 草稿 draft（不顯示在前台）, value: draft }
+                  - { label: 已發布 published（顯示在前台）, value: published }
+                default: { label: 已發布 published（顯示在前台）, value: published }
+              - { label: 置頂 Featured, name: featured, widget: boolean, default: false, hint: 開啟後會排在一般作品之前，再依 Display Order 排序。 }
+              - { label: 標題 Title, name: title, widget: string }
+              - { label: 分類 Category, name: category, widget: string, hint: "中文可用：流程設計、內部工具、專案管理；英文可用：Process Design、Internal Tool、Project Management。" }
+              - { label: 摘要 Summary, name: summary, widget: text }
+              - { label: 我的角色 Role, name: role, widget: string }
+              - label: 成果 Outcomes
                 name: outcomes
                 widget: list
+                collapsed: false
+                label_singular: outcome
                 field: { label: Outcome, name: outcome, widget: text }
-              - label: Tools
+              - label: 工具 / 技術 Tools
                 name: tools
                 widget: list
+                collapsed: false
+                label_singular: tool
                 field: { label: Tool, name: tool, widget: string }
-              - label: Detail Descriptions
+              - label: 延伸描述 Detail Descriptions
                 name: descriptions
                 widget: list
                 required: false
+                collapsed: false
+                label_singular: description
                 summary: "{{fields.label}}"
                 fields:
-                  - { label: Label, name: label, widget: string }
-                  - { label: Text, name: text, widget: text }
-              - label: Images
+                  - { label: 小標 Label, name: label, widget: string }
+                  - { label: 文字 Text, name: text, widget: text }
+              - label: 圖片 Images
                 name: images
                 widget: list
                 required: false
+                collapsed: false
+                label_singular: image
                 summary: "{{fields.caption}}"
+                hint: 圖片會顯示在作品展開區塊。建議上傳 PNG/JPG/WebP，並補上 alt 文字。
                 fields:
-                  - { label: Image, name: src, widget: image }
-                  - { label: Alt Text, name: alt, widget: string }
-                  - { label: Caption, name: caption, widget: string }
-      - label: Portfolio - English
+                  - { label: 圖片 Image, name: src, widget: image }
+                  - { label: 替代文字 Alt Text, name: alt, widget: string }
+                  - { label: 圖說 Caption, name: caption, widget: string }
+      - label: 英文作品集
         name: portfolio_en
         file: src/content/portfolio/en.json
+        preview_path: en/portfolio
         format: json
         fields: *portfolio_fields
