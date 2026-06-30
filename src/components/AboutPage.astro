@@ -1,0 +1,76 @@
+---
+interface Award {
+  role: string;
+  description: string;
+}
+
+interface Content {
+  sectionLabel: string;
+  name: string;
+  bio: string;
+  awardsLabel: string;
+  awards: Award[];
+  availabilityLabel: string;
+  availability: string[];
+  contactLabel: string;
+  contact: {
+    location: string;
+    email: string;
+    linkedin: string;
+  };
+}
+
+const { content } = Astro.props as { content: Content };
+---
+
+<div class="mb-3">
+  <p class="section-label mb-4">{content.sectionLabel}</p>
+  <h1 class="text-6xl font-bold tracking-tight leading-none">{content.name}</h1>
+</div>
+
+<div class="rule-strong mt-8 mb-10"></div>
+
+<p class="text-base text-zinc-600 leading-relaxed max-w-2xl mb-10">
+  {content.bio}
+</p>
+
+<div class="mb-16">
+  <p class="section-label mb-4">{content.awardsLabel}</p>
+  <ul class="space-y-3 max-w-2xl">
+    {content.awards.map((award) => (
+      <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
+        <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
+        <span><span class="font-medium text-[#0a0a0a]">{award.role}</span> — {award.description}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 border-t-2 border-[#0a0a0a]">
+  <div class="py-8 md:border-r border-zinc-200 md:pr-10">
+    <p class="section-label mb-4">{content.availabilityLabel}</p>
+    {content.availability.map((item, index) => (
+      <p class={index === 0 ? 'text-sm font-semibold text-[#0a0a0a]' : 'text-sm text-zinc-500'}>{item}</p>
+    ))}
+  </div>
+
+  <div class="py-8 border-t-2 md:border-t-0 border-[#0a0a0a] md:pl-10">
+    <p class="section-label mb-4">{content.contactLabel}</p>
+    <ul class="space-y-1.5 text-sm">
+      <li class="text-zinc-500">{content.contact.location}</li>
+      <li>
+        <a href={`mailto:${content.contact.email}`}
+           class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
+          {content.contact.email}
+        </a>
+      </li>
+      <li>
+        <a href={content.contact.linkedin}
+           target="_blank" rel="noopener"
+           class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
+          LinkedIn →
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

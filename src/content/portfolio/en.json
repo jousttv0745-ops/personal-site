@@ -1,0 +1,98 @@
+{
+  "title": "Portfolio — Tu, Wei-Hua",
+  "sectionLabel": "Selected Work",
+  "heading": "Portfolio",
+  "headingMuted": "",
+  "roleLabel": "My Role",
+  "outcomesLabel": "Outcomes",
+  "toolsLabel": "Tools / Stack",
+  "projects": [
+    {
+      "id": "keyword",
+      "order": 10,
+      "status": "published",
+      "featured": true,
+      "title": "High-Potential Ad Keyword Selection Tool",
+      "category": "Internal Tool",
+      "summary": "Built with Claude skill + Looker Studio to help ad sales, planners, and marketing teams query site traffic data, auto-shortlist high-potential keywords, and generate GAM targeting lists with placement recommendations — significantly reducing manual prep time.",
+      "role": "Owner",
+      "outcomes": [
+        "Ops time cut by 60%",
+        "Adopted by more than 2 departments"
+      ],
+      "tools": ["SQL", "Looker Studio", "Claude API"],
+      "descriptions": [],
+      "images": [
+        {
+          "src": "assets/keyword-demo-1.png",
+          "alt": "Looker Studio keyword traffic distribution dashboard",
+          "caption": "Step 1 — Looker Studio"
+        },
+        {
+          "src": "assets/keyword-demo-2.png",
+          "alt": "Claude AI conversation generating ad keyword targeting plan",
+          "caption": "Step 2 — Claude AI"
+        }
+      ]
+    },
+    {
+      "id": "ops",
+      "order": 20,
+      "status": "published",
+      "featured": false,
+      "title": "Building a Digital-First Editorial Operating Model",
+      "category": "Process Design",
+      "summary": "Led the redesign of the digital editorial production workflow by coordinating editorial, design, engineering, social media, and newsroom teams — shifting the organization toward a digital-first content operating model centered on user experience.",
+      "role": "Owner",
+      "outcomes": [
+        "Established cross-functional production workflow and fixed delivery cadence",
+        "Consistent quarterly delivery: 1 large + 1 small digital editorial campaign"
+      ],
+      "tools": ["Cross-Functional Coordination", "Workflow Design", "Editorial Strategy", "Project Management"],
+      "descriptions": [],
+      "images": [
+        {
+          "src": "assets/ops-demo-1.png",
+          "alt": "Digital editorial production cycle and quarterly schedule planning chart",
+          "caption": "Production Cycle & Quarterly Schedule"
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "order": 30,
+      "status": "published",
+      "featured": false,
+      "title": "Website Redesign Projects",
+      "category": "Project Management",
+      "summary": "Led planning and project management for two website redesigns, covering brand visual refresh, UX optimization, new feature development, and content strategy.",
+      "role": "Owner",
+      "outcomes": [
+        "Both redesigns launched on schedule"
+      ],
+      "tools": ["Project Management", "Brand Strategy", "SEO", "UX Planning", "Design-Dev Coordination", "Figma"],
+      "descriptions": [
+        {
+          "label": "National Human Rights Museum — Official Website Redesign",
+          "text": "Participated in the full redesign of the museum's website and brand visual identity (2021/05–2022/01). Led project scoping and management, defining the brand rejuvenation direction, UX improvements, and design-development specifications."
+        },
+        {
+          "label": "2025 Talent, in Taiwan — Sustainability Action Alliance",
+          "text": "Covered content agenda-setting, advocacy review, and new feature development (2024/11–2025/03). Drove SEO improvements, dedicated page planning and design-development, and overall content experience optimization."
+        }
+      ],
+      "images": [
+        {
+          "src": "assets/web-demo-1.png",
+          "alt": "National Human Rights Museum website redesign",
+          "caption": "National Human Rights Museum"
+        },
+        {
+          "src": "assets/web-demo-2.png",
+          "alt": "Talent in Taiwan project page",
+          "caption": "Talent, in Taiwan"
+        }
+      ]
+    }
+  ]
+}

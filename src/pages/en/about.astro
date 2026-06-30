@@ -1,67 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AboutPage from '../../components/AboutPage.astro';
+import content from '../../content/about/en.json';
 ---
 
-<Layout title="About — Tu, Wei-Hua" lang="en" page="about">
-
-  <!-- Name -->
-  <div class="mb-3">
-    <p class="section-label mb-4">About</p>
-    <h1 class="text-6xl font-bold tracking-tight leading-none">Tu,&nbsp;Wei&#8209;Hua</h1>
-  </div>
-
-  <div class="rule-strong mt-8 mb-10"></div>
-
-  <!-- Bio -->
-  <p class="text-base text-zinc-600 leading-relaxed max-w-2xl mb-10">
-    Anthropologist-turned strategist focused on audience infrastructure, behavioral systems, and data monetization.
-    Experienced in translating complex business and user behavior into scalable operational and cross-functional
-    frameworks across media and digital platforms.
-  </p>
-
-  <!-- Awards -->
-  <div class="mb-16">
-    <p class="section-label mb-4">Awards</p>
-    <ul class="space-y-3 max-w-2xl">
-      <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
-        <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
-        <span><span class="font-medium text-[#0a0a0a]">Producer</span> — <em>Tiptoe</em> (踮腳尖), nominated for K-Plus Children's Short Film Competition, 69th Berlin International Film Festival</span>
-      </li>
-      <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
-        <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
-        <span><span class="font-medium text-[#0a0a0a]">Production Assistant</span> — <em>Small Talk</em> (日常對話), Teddy Award, 67th Berlin International Film Festival; Taiwan's submission for Best Foreign Language Film, 90th Academy Awards</span>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Two-column info grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 border-t-2 border-[#0a0a0a]">
-
-    <div class="py-8 md:border-r border-zinc-200 md:pr-10">
-      <p class="section-label mb-4">Availability</p>
-      <p class="text-sm font-semibold text-[#0a0a0a]">Open to Full-time</p>
-    </div>
-
-    <div class="py-8 border-t-2 md:border-t-0 border-[#0a0a0a] md:pl-10">
-      <p class="section-label mb-4">聯絡 Contact</p>
-      <ul class="space-y-1.5 text-sm">
-        <li class="text-zinc-500">Taipei, Taiwan</li>
-        <li>
-          <a href="mailto:jousttv0745@gmail.com"
-             class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
-            jousttv0745@gmail.com
-          </a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/wei-hua-tu-b9049099/"
-             target="_blank" rel="noopener"
-             class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
-            LinkedIn →
-          </a>
-        </li>
-      </ul>
-    </div>
-
-  </div>
-
+<Layout title={content.title} lang="en" page="about">
+  <AboutPage content={content} />
 </Layout>

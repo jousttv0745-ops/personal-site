@@ -1,0 +1,198 @@
+backend:
+  name: github
+  repo: jousttv0745-ops/personal-site
+  branch: main
+  squash_merges: true
+
+publish_mode: editorial_workflow
+
+media_folder: public/uploads
+public_folder: /personal-site/uploads
+
+site_url: https://jousttv0745-ops.github.io/personal-site
+display_url: https://jousttv0745-ops.github.io/personal-site
+logo_url: /personal-site/favicon.svg
+
+collections:
+  - name: about
+    label: About
+    editor:
+      preview: false
+    files:
+      - label: About - Chinese
+        name: about_zh
+        file: src/content/about/zh.json
+        format: json
+        fields:
+          - { label: Page Title, name: title, widget: string }
+          - { label: Section Label, name: sectionLabel, widget: string }
+          - { label: Name, name: name, widget: string }
+          - { label: Bio, name: bio, widget: text }
+          - { label: Awards Label, name: awardsLabel, widget: string }
+          - label: Awards
+            name: awards
+            widget: list
+            summary: "{{fields.role}}"
+            fields:
+              - { label: Role, name: role, widget: string }
+              - { label: Description, name: description, widget: text }
+          - { label: Availability Label, name: availabilityLabel, widget: string }
+          - label: Availability Lines
+            name: availability
+            widget: list
+            field: { label: Line, name: line, widget: string }
+          - { label: Contact Label, name: contactLabel, widget: string }
+          - label: Contact
+            name: contact
+            widget: object
+            fields:
+              - { label: Location, name: location, widget: string }
+              - { label: Email, name: email, widget: string }
+              - { label: LinkedIn URL, name: linkedin, widget: string }
+      - label: About - English
+        name: about_en
+        file: src/content/about/en.json
+        format: json
+        fields:
+          - { label: Page Title, name: title, widget: string }
+          - { label: Section Label, name: sectionLabel, widget: string }
+          - { label: Name, name: name, widget: string }
+          - { label: Bio, name: bio, widget: text }
+          - { label: Awards Label, name: awardsLabel, widget: string }
+          - label: Awards
+            name: awards
+            widget: list
+            summary: "{{fields.role}}"
+            fields:
+              - { label: Role, name: role, widget: string }
+              - { label: Description, name: description, widget: text }
+          - { label: Availability Label, name: availabilityLabel, widget: string }
+          - label: Availability Lines
+            name: availability
+            widget: list
+            field: { label: Line, name: line, widget: string }
+          - { label: Contact Label, name: contactLabel, widget: string }
+          - label: Contact
+            name: contact
+            widget: object
+            fields:
+              - { label: Location, name: location, widget: string }
+              - { label: Email, name: email, widget: string }
+              - { label: LinkedIn URL, name: linkedin, widget: string }
+
+  - name: resume
+    label: Resume
+    editor:
+      preview: false
+    files:
+      - label: Resume - Chinese
+        name: resume_zh
+        file: src/content/resume/zh.json
+        format: json
+        fields: &resume_fields
+          - { label: Page Title, name: title, widget: string }
+          - { label: Section Label, name: sectionLabel, widget: string }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Muted Heading, name: headingMuted, widget: string, required: false }
+          - label: Experience
+            name: experience
+            widget: list
+            summary: "{{fields.role}} — {{fields.company}}"
+            fields:
+              - { label: Role, name: role, widget: string }
+              - { label: Company, name: company, widget: string }
+              - { label: Period, name: period, widget: string }
+              - label: Groups
+                name: groups
+                widget: list
+                summary: "{{fields.label}}"
+                fields:
+                  - { label: Group Label, name: label, widget: string, required: false }
+                  - label: Bullets
+                    name: items
+                    widget: list
+                    field: { label: Bullet, name: bullet, widget: text }
+          - label: Education
+            name: education
+            widget: object
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: School, name: school, widget: string }
+              - { label: Degree, name: degree, widget: string }
+          - { label: Skills Label, name: skillsLabel, widget: string }
+          - label: Skills
+            name: skills
+            widget: list
+            summary: "{{fields.category}}"
+            fields:
+              - { label: Category, name: category, widget: string }
+              - label: Items
+                name: items
+                widget: list
+                field: { label: Skill, name: skill, widget: string }
+      - label: Resume - English
+        name: resume_en
+        file: src/content/resume/en.json
+        format: json
+        fields: *resume_fields
+
+  - name: portfolio
+    label: Portfolio
+    editor:
+      preview: false
+    files:
+      - label: Portfolio - Chinese
+        name: portfolio_zh
+        file: src/content/portfolio/zh.json
+        format: json
+        fields: &portfolio_fields
+          - { label: Page Title, name: title, widget: string }
+          - { label: Section Label, name: sectionLabel, widget: string }
+          - { label: Heading, name: heading, widget: string }
+          - { label: Muted Heading, name: headingMuted, widget: string, required: false }
+          - { label: Role Label, name: roleLabel, widget: string }
+          - { label: Outcomes Label, name: outcomesLabel, widget: string }
+          - { label: Tools Label, name: toolsLabel, widget: string }
+          - label: Projects
+            name: projects
+            widget: list
+            summary: "{{fields.order}}. {{fields.title}}"
+            fields:
+              - { label: ID, name: id, widget: string, hint: "Used for the accordion panel id. Keep lowercase and unique." }
+              - { label: Display Order, name: order, widget: number, value_type: int, default: 100 }
+              - { label: Status, name: status, widget: select, options: ["draft", "published"], default: published }
+              - { label: Featured, name: featured, widget: boolean, default: false }
+              - { label: Title, name: title, widget: string }
+              - { label: Category, name: category, widget: string }
+              - { label: Summary, name: summary, widget: text }
+              - { label: Role, name: role, widget: string }
+              - label: Outcomes
+                name: outcomes
+                widget: list
+                field: { label: Outcome, name: outcome, widget: text }
+              - label: Tools
+                name: tools
+                widget: list
+                field: { label: Tool, name: tool, widget: string }
+              - label: Detail Descriptions
+                name: descriptions
+                widget: list
+                required: false
+                summary: "{{fields.label}}"
+                fields:
+                  - { label: Label, name: label, widget: string }
+                  - { label: Text, name: text, widget: text }
+              - label: Images
+                name: images
+                widget: list
+                required: false
+                summary: "{{fields.caption}}"
+                fields:
+                  - { label: Image, name: src, widget: image }
+                  - { label: Alt Text, name: alt, widget: string }
+                  - { label: Caption, name: caption, widget: string }
+      - label: Portfolio - English
+        name: portfolio_en
+        file: src/content/portfolio/en.json
+        format: json
+        fields: *portfolio_fields

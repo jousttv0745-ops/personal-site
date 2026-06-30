@@ -1,0 +1,112 @@
+---
+interface ExperienceGroup {
+  label: string;
+  items: string[];
+}
+
+interface Experience {
+  role: string;
+  company: string;
+  period: string;
+  groups: ExperienceGroup[];
+}
+
+interface SkillGroup {
+  category: string;
+  items: string[];
+}
+
+interface Content {
+  sectionLabel: string;
+  heading: string;
+  headingMuted: string;
+  experience: Experience[];
+  education: {
+    label: string;
+    school: string;
+    degree: string;
+  };
+  skillsLabel: string;
+  skills: SkillGroup[];
+}
+
+const { content } = Astro.props as { content: Content };
+---
+
+<div class="pt-4 mb-12">
+  <p class="section-label mb-4">{content.sectionLabel}</p>
+  <h1 class="text-5xl font-bold tracking-tight text-[#0a0a0a] leading-none">
+    {content.heading}
+    {content.headingMuted && <span class="text-zinc-300"> {content.headingMuted}</span>}
+  </h1>
+</div>
+
+<section class="mb-16">
+  <div class="rule-strong mb-0">
+    {content.experience.map((job, i) => (
+      <div class={`py-10 ${i < content.experience.length - 1 ? 'border-b border-zinc-100' : ''}`}>
+        <div class="flex flex-col md:flex-row md:items-baseline md:justify-between gap-1 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-[#0a0a0a]">{job.role}</h2>
+            <p class="text-sm text-zinc-500 mt-0.5">{job.company}</p>
+          </div>
+          <span class="section-label whitespace-nowrap">{job.period}</span>
+        </div>
+
+        <div class="space-y-6">
+          {job.groups.map((group) => (
+            <div>
+              {group.label && (
+                <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-blue-600 mb-2.5">{group.label}</p>
+              )}
+              <ul class="space-y-2">
+                {group.items.map((item) => (
+                  <li class="flex items-start gap-3 text-sm text-zinc-600 leading-relaxed">
+                    <span class="mt-2 h-px w-3 bg-zinc-300 shrink-0"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section class="mb-16">
+  <div class="rule-strong">
+    <div class="py-8 flex flex-col md:flex-row md:items-baseline md:justify-between gap-1">
+      <div>
+        <p class="section-label mb-3">{content.education.label}</p>
+        <p class="text-base font-semibold text-[#0a0a0a]">{content.education.school}</p>
+        <p class="text-sm text-zinc-500">{content.education.degree}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="rule-strong">
+    <div class="py-8">
+      <p class="section-label mb-6">{content.skillsLabel}</p>
+      <div class="space-y-5">
+        {content.skills.map((group) => (
+          <div class="flex gap-6 items-start">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-400 w-20 shrink-0 pt-1">
+              {group.category}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {group.items.map((skill) => (
+                <span class="px-3 py-1 text-xs font-medium border border-zinc-200 text-zinc-600 rounded-sm hover:border-zinc-400 transition-colors">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

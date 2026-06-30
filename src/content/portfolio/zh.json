@@ -1,0 +1,98 @@
+{
+  "title": "作品集 — 杜韋樺",
+  "sectionLabel": "Selected Work",
+  "heading": "作品集",
+  "headingMuted": "Portfolio",
+  "roleLabel": "我的角色",
+  "outcomesLabel": "成果",
+  "toolsLabel": "工具 / 技術",
+  "projects": [
+    {
+      "id": "keyword",
+      "order": 10,
+      "status": "published",
+      "featured": true,
+      "title": "廣告高潛力關鍵字圈選小工具",
+      "category": "內部工具",
+      "summary": "以 Claude skill + Looker Studio 協助廣告業務、企劃及行銷人員，從站內流量數據中查詢並自動篩選高潛力關鍵字，生成 GAM 投放清單及投放建議，大幅縮短人工整理時間。",
+      "role": "Owner",
+      "outcomes": [
+        "業務作業時間縮短 60%",
+        "已被超過 2 個部門採用"
+      ],
+      "tools": ["SQL", "Looker Studio", "Claude API"],
+      "descriptions": [],
+      "images": [
+        {
+          "src": "assets/keyword-demo-1.png",
+          "alt": "Looker Studio 近期關鍵字流量分布查詢畫面",
+          "caption": "Step 1 — Looker Studio"
+        },
+        {
+          "src": "assets/keyword-demo-2.png",
+          "alt": "Claude AI 對話介面生成廣告關鍵字投放規劃",
+          "caption": "Step 2 — Claude AI"
+        }
+      ]
+    },
+    {
+      "id": "ops",
+      "order": 20,
+      "status": "published",
+      "featured": false,
+      "title": "建立 Digital-First 的內容營運模型",
+      "category": "流程設計",
+      "summary": "主導重建數位策展專題工作流程，協調編輯、設計、工程、社群與記者團隊，推動組織從「紙本內容轉網頁」模式轉向以使用者體驗為核心的數位主導內容營運模型。",
+      "role": "Owner",
+      "outcomes": [
+        "建立跨職能製作流程與固定排程節奏",
+        "每季穩定產出大型策展 ×1、小型 ×1"
+      ],
+      "tools": ["跨職能協調", "流程設計", "編輯策略", "專案管理"],
+      "descriptions": [],
+      "images": [
+        {
+          "src": "assets/ops-demo-1.png",
+          "alt": "數位策展製作週期與季度排程規劃圖",
+          "caption": "製作週期規劃與季度排程"
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "order": 30,
+      "status": "published",
+      "featured": false,
+      "title": "網站改版專案",
+      "category": "專案管理",
+      "summary": "主導兩個網站改版的規劃及專案管理，涵蓋品牌視覺年輕化、網站體驗優化、新功能開發與整體內容策略。",
+      "role": "Owner",
+      "outcomes": [
+        "改版皆如期上線"
+      ],
+      "tools": ["專案管理", "品牌策略", "SEO", "UX 規劃", "設計開發協作", "Figma"],
+      "descriptions": [
+        {
+          "label": "國家人權博物館官方網站改版",
+          "text": "參與國家人權博物館官網及整體品牌視覺改版（2021/05～2022/01），主導該標案規劃及專案管理執行，定義品牌主視覺年輕化、網站體驗優化及設計開發細項。"
+        },
+        {
+          "label": "2025 Talent, in Taiwan 台灣人才永續行動聯盟專案",
+          "text": "包括內容議題設定、倡議審核及網頁新功能開發上架（2024/11～2025/03），推動搜尋優化、專屬頁面規劃及設計開發、整體內容體驗優化。"
+        }
+      ],
+      "images": [
+        {
+          "src": "assets/web-demo-1.png",
+          "alt": "國家人權博物館官網改版示意",
+          "caption": "國家人權博物館"
+        },
+        {
+          "src": "assets/web-demo-2.png",
+          "alt": "Talent in Taiwan 專案頁面示意",
+          "caption": "Talent, in Taiwan"
+        }
+      ]
+    }
+  ]
+}
