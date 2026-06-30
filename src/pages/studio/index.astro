@@ -1,0 +1,1398 @@
+---
+import portfolioZh from '../../content/portfolio/zh.json';
+import portfolioEn from '../../content/portfolio/en.json';
+import resumeZh from '../../content/resume/zh.json';
+import resumeEn from '../../content/resume/en.json';
+import '../../styles/global.css';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const studioData = {
+  base,
+  portfolio: { zh: portfolioZh, en: portfolioEn },
+  resume: { zh: resumeZh, en: resumeEn },
+};
+---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Studio Admin - Personal Site</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen bg-[#f7f8fb] text-[#171a21]">
+    <div id="studio-root" class="min-h-screen"></div>
+
+    <script define:vars={{ studioData }}>
+      window.__STUDIO_DATA__ = studioData;
+    </script>
+
+    <script type="module">
+      const root = document.getElementById('studio-root');
+      const studioData = window.__STUDIO_DATA__;
+
+      const state = {
+        section: 'portfolio',
+        locale: 'zh',
+        portfolio: structuredClone(studioData.portfolio),
+        resume: structuredClone(studioData.resume),
+        selectedProjectId: studioData.portfolio.zh.projects[0]?.id ?? null,
+        selectedExperienceIndex: 0,
+        dirty: false,
+        saving: false,
+        message: 'Ready',
+        messageType: 'neutral',
+        query: '',
+        statusFilter: 'all',
+        sortMode: 'order',
+      };
+
+      const classNames = (...items) => items.filter(Boolean).join(' ');
+      const currentPortfolio = () => state.portfolio[state.locale];
+      const currentResume = () => state.resume[state.locale];
+      const currentProjects = () => currentPortfolio().projects ?? [];
+      const currentExperience = () => currentResume().experience ?? [];
+
+      const markDirty = (message = 'Unsaved changes') => {
+        state.dirty = true;
+        state.message = message;
+        state.messageType = 'warning';
+        syncStatusPill();
+      };
+
+      const setMessage = (message, type = 'neutral') => {
+        state.message = message;
+        state.messageType = type;
+        syncStatusPill();
+      };
+
+      const syncStatusPill = () => {
+        const pill = root?.querySelector('.status-pill');
+        if (!pill) return;
+        pill.textContent = state.saving ? 'Working...' : state.message;
+        pill.className = classNames('status-pill', `is-${state.messageType}`);
+      };
+
+      const normalizePath = (src) => {
+        if (!src) return '';
+        if (src.startsWith('http')) return src;
+        if (src.startsWith('/')) return `${studioData.base}${src.replace(/^\//, '')}`;
+        return `${studioData.base}${src}`;
+      };
+
+      const escapeHtml = (value) =>
+        String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+
+      const validateProjectId = (id) => /^[a-z0-9-]+$/.test(id);
+
+      const validatePortfolio = (portfolio) => {
+        const ids = new Set();
+        for (const project of portfolio.projects ?? []) {
+          if (!project.id || !validateProjectId(project.id)) return 'Project ID must use lowercase letters, numbers, and hyphens.';
+          if (ids.has(project.id)) return `Duplicate project ID: ${project.id}`;
+          ids.add(project.id);
+          if (!project.title || !project.category || !project.summary || !project.role) return `Project "${project.id}" is missing required fields.`;
+          if (!Number.isInteger(Number(project.order)) || Number(project.order) < 1) return `Project "${project.id}" needs a positive display order.`;
+          if (!['draft', 'published'].includes(project.status)) return `Project "${project.id}" has an invalid status.`;
+        }
+        return null;
+      };
+
+      const validateResume = (resume) => {
+        for (const item of resume.experience ?? []) {
+          if (!item.role || !item.company || !item.period) return 'Every experience needs role, company, and period.';
+          if (!Array.isArray(item.groups) || item.groups.length === 0) return `Experience "${item.role}" needs at least one group.`;
+          for (const group of item.groups) {
+            if (!Array.isArray(group.items) || group.items.length === 0) return `Experience "${item.role}" has an empty group.`;
+            if (group.items.some((bullet) => !String(bullet ?? '').trim())) return `Experience "${item.role}" has an empty bullet.`;
+          }
+        }
+        return null;
+      };
+
+      const apiPath = (kind) => `/.netlify/functions/content-${kind}?locale=${state.locale}`;
+
+      const saveCurrent = async () => {
+        const kind = state.section;
+        const payload = kind === 'portfolio' ? currentPortfolio() : currentResume();
+        const error = kind === 'portfolio' ? validatePortfolio(payload) : validateResume(payload);
+        if (error) {
+          setMessage(error, 'error');
+          render();
+          return;
+        }
+
+        state.saving = true;
+        setMessage('Saving draft to GitHub branch...', 'neutral');
+        render();
+
+        try {
+          const response = await fetch(apiPath(kind), {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.message || 'Save failed');
+          state.dirty = false;
+          setMessage(result.previewUrl ? `Draft saved. Preview: ${result.previewUrl}` : 'Draft saved.', 'success');
+        } catch (error) {
+          setMessage(`${error.message}. Configure Netlify Functions and GitHub token before saving.`, 'error');
+        } finally {
+          state.saving = false;
+          render();
+        }
+      };
+
+      const publishCurrent = async () => {
+        state.saving = true;
+        setMessage('Preparing publish PR...', 'neutral');
+        render();
+        try {
+          const response = await fetch('/.netlify/functions/publish', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ locale: state.locale, kind: state.section }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.message || 'Publish PR failed');
+          setMessage(result.prUrl ? `Publish PR ready: ${result.prUrl}` : 'Publish PR ready.', 'success');
+        } catch (error) {
+          setMessage(`${error.message}. Publish requires Netlify Functions and GitHub token.`, 'error');
+        } finally {
+          state.saving = false;
+          render();
+        }
+      };
+
+      const filteredProjects = () => {
+        const query = state.query.trim().toLowerCase();
+        const projects = [...currentProjects()].filter((project) => {
+          const matchesQuery = !query || [project.title, project.summary, project.category, project.id].some((field) => String(field ?? '').toLowerCase().includes(query));
+          const matchesStatus = state.statusFilter === 'all' || project.status === state.statusFilter;
+          return matchesQuery && matchesStatus;
+        });
+
+        projects.sort((a, b) => {
+          if (state.sortMode === 'title') return String(a.title).localeCompare(String(b.title));
+          if (state.sortMode === 'status') return String(a.status).localeCompare(String(b.status));
+          if (state.sortMode === 'category') return String(a.category).localeCompare(String(b.category));
+          return Number(a.order ?? 100) - Number(b.order ?? 100);
+        });
+
+        return projects;
+      };
+
+      const selectedProject = () => currentProjects().find((project) => project.id === state.selectedProjectId) ?? currentProjects()[0];
+      const selectedExperience = () => currentExperience()[state.selectedExperienceIndex] ?? currentExperience()[0];
+
+      const updateSelectedProject = (patch) => {
+        const project = selectedProject();
+        if (!project) return;
+        Object.assign(project, patch);
+        if (patch.id) state.selectedProjectId = patch.id;
+        markDirty('Project updated');
+        render();
+      };
+
+      const updateProjectListField = (field, index, value) => {
+        const project = selectedProject();
+        if (!project) return;
+        project[field] = project[field] ?? [];
+        project[field][index] = value;
+        markDirty(`${field} updated`);
+        render();
+      };
+
+      const addProjectListItem = (field, value = '') => {
+        const project = selectedProject();
+        if (!project) return;
+        project[field] = project[field] ?? [];
+        project[field].push(value);
+        markDirty(`${field} updated`);
+        render();
+      };
+
+      const removeProjectListItem = (field, index) => {
+        const project = selectedProject();
+        if (!project) return;
+        project[field] = (project[field] ?? []).filter((_, itemIndex) => itemIndex !== index);
+        markDirty(`${field} updated`);
+        render();
+      };
+
+      const addProject = () => {
+        const nextOrder = Math.max(0, ...currentProjects().map((project) => Number(project.order ?? 0))) + 10;
+        const project = {
+          id: `new-project-${Date.now().toString().slice(-5)}`,
+          order: nextOrder,
+          status: 'draft',
+          featured: false,
+          title: 'New Project',
+          category: state.locale === 'zh' ? '流程設計' : 'Process Design',
+          summary: '',
+          role: 'Owner',
+          outcomes: [''],
+          tools: [],
+          descriptions: [],
+          images: [],
+        };
+        currentProjects().push(project);
+        state.selectedProjectId = project.id;
+        markDirty('New project added');
+        render();
+      };
+
+      const removeProject = () => {
+        const project = selectedProject();
+        if (!project) return;
+        if (!confirm(`Remove project "${project.title}"?`)) return;
+        currentPortfolio().projects = currentProjects().filter((item) => item !== project);
+        state.selectedProjectId = currentProjects()[0]?.id ?? null;
+        markDirty('Project removed');
+        render();
+      };
+
+      const updateExperience = (patch) => {
+        const item = selectedExperience();
+        if (!item) return;
+        Object.assign(item, patch);
+        markDirty('Experience updated');
+        render();
+      };
+
+      const addExperience = () => {
+        currentExperience().push({
+          role: 'New Role',
+          company: 'Company',
+          period: 'YYYY.MM - YYYY.MM',
+          groups: [{ label: '', items: [''] }],
+        });
+        state.selectedExperienceIndex = currentExperience().length - 1;
+        markDirty('Experience added');
+        render();
+      };
+
+      const removeExperience = () => {
+        const item = selectedExperience();
+        if (!item) return;
+        if (!confirm(`Remove experience "${item.role}"?`)) return;
+        currentResume().experience = currentExperience().filter((_, index) => index !== state.selectedExperienceIndex);
+        state.selectedExperienceIndex = Math.max(0, state.selectedExperienceIndex - 1);
+        markDirty('Experience removed');
+        render();
+      };
+
+      const updateGroup = (groupIndex, patch) => {
+        const item = selectedExperience();
+        if (!item) return;
+        Object.assign(item.groups[groupIndex], patch);
+        markDirty('Group updated');
+        render();
+      };
+
+      const addGroup = () => {
+        const item = selectedExperience();
+        if (!item) return;
+        item.groups.push({ label: '', items: [''] });
+        markDirty('Group added');
+        render();
+      };
+
+      const removeGroup = (groupIndex) => {
+        const item = selectedExperience();
+        if (!item) return;
+        item.groups = item.groups.filter((_, index) => index !== groupIndex);
+        markDirty('Group removed');
+        render();
+      };
+
+      const updateBullet = (groupIndex, bulletIndex, value) => {
+        const item = selectedExperience();
+        if (!item) return;
+        item.groups[groupIndex].items[bulletIndex] = value;
+        markDirty('Bullet updated');
+        render();
+      };
+
+      const addBullet = (groupIndex) => {
+        const item = selectedExperience();
+        if (!item) return;
+        item.groups[groupIndex].items.push('');
+        markDirty('Bullet added');
+        render();
+      };
+
+      const removeBullet = (groupIndex, bulletIndex) => {
+        const item = selectedExperience();
+        if (!item) return;
+        item.groups[groupIndex].items = item.groups[groupIndex].items.filter((_, index) => index !== bulletIndex);
+        markDirty('Bullet removed');
+        render();
+      };
+
+      const updateSkillCategory = (categoryIndex, patch) => {
+        const resume = currentResume();
+        Object.assign(resume.skills[categoryIndex], patch);
+        markDirty('Skills updated');
+        render();
+      };
+
+      const addSkill = (categoryIndex) => {
+        const resume = currentResume();
+        resume.skills[categoryIndex].items.push('');
+        markDirty('Skill added');
+        render();
+      };
+
+      const updateSkill = (categoryIndex, skillIndex, value) => {
+        const resume = currentResume();
+        resume.skills[categoryIndex].items[skillIndex] = value;
+        markDirty('Skill updated');
+        render();
+      };
+
+      const removeSkill = (categoryIndex, skillIndex) => {
+        const resume = currentResume();
+        resume.skills[categoryIndex].items = resume.skills[categoryIndex].items.filter((_, index) => index !== skillIndex);
+        markDirty('Skill removed');
+        render();
+      };
+
+      const renderShell = (content) => `
+        <div class="studio-shell">
+          <aside class="studio-sidebar">
+            <div class="brand-lockup">
+              <div class="brand-mark">L</div>
+              <div>
+                <p class="brand-title">Lumina Admin</p>
+                <p class="brand-subtitle">Portfolio CMS</p>
+              </div>
+            </div>
+            <nav class="side-nav">
+              ${navButton('portfolio', 'Portfolio')}
+              ${navButton('resume', 'Resume')}
+              <a class="side-link is-muted" href="${studioData.base}admin/">Legacy CMS</a>
+              <a class="side-link is-muted" href="${studioData.base}zh/about/">Public Site</a>
+            </nav>
+            <button class="publish-button" data-action="publish">Publish Site</button>
+          </aside>
+
+          <main class="studio-main">
+            <header class="studio-topbar">
+              <input class="search-input" data-field="query" value="${escapeHtml(state.query)}" placeholder="Search entries..." />
+              <div class="topbar-actions">
+                <select class="locale-select" data-field="locale">
+                  <option value="zh" ${state.locale === 'zh' ? 'selected' : ''}>中文</option>
+                  <option value="en" ${state.locale === 'en' ? 'selected' : ''}>English</option>
+                </select>
+                <span class="${classNames('status-pill', `is-${state.messageType}`)}">${escapeHtml(state.saving ? 'Working...' : state.message)}</span>
+              </div>
+            </header>
+            ${content}
+          </main>
+        </div>
+      `;
+
+      const navButton = (section, label) => `
+        <button class="${classNames('side-link', state.section === section && 'is-active')}" data-section="${section}">
+          <span>${label}</span>
+        </button>
+      `;
+
+      const renderPortfolio = () => {
+        const projects = filteredProjects();
+        const project = selectedProject();
+        return `
+          <section class="workspace">
+            <div class="page-heading">
+              <div>
+                <h1>Manage Projects</h1>
+                <p>Organize and configure your portfolio items.</p>
+              </div>
+              <div class="toolbar">
+                <select class="control" data-field="statusFilter">
+                  <option value="all" ${state.statusFilter === 'all' ? 'selected' : ''}>All status</option>
+                  <option value="published" ${state.statusFilter === 'published' ? 'selected' : ''}>Published</option>
+                  <option value="draft" ${state.statusFilter === 'draft' ? 'selected' : ''}>Draft</option>
+                </select>
+                <select class="control" data-field="sortMode">
+                  <option value="order" ${state.sortMode === 'order' ? 'selected' : ''}>Sort by order</option>
+                  <option value="title" ${state.sortMode === 'title' ? 'selected' : ''}>Sort by title</option>
+                  <option value="status" ${state.sortMode === 'status' ? 'selected' : ''}>Sort by status</option>
+                  <option value="category" ${state.sortMode === 'category' ? 'selected' : ''}>Sort by category</option>
+                </select>
+                <button class="primary-button" data-action="add-project">New Project</button>
+                <button class="secondary-button" data-action="save">Save Changes</button>
+              </div>
+            </div>
+            <div class="portfolio-grid">
+              <div class="table-panel">
+                <div class="table-head">
+                  <span></span>
+                  <span>Cover</span>
+                  <span>Project Details</span>
+                  <span>Status</span>
+                  <span>Live</span>
+                </div>
+                <div class="project-rows">
+                  ${projects.map((item) => renderProjectRow(item)).join('')}
+                </div>
+                <p class="record-count">Showing ${projects.length} of ${currentProjects().length} projects</p>
+              </div>
+              ${project ? renderProjectEditor(project) : '<div class="editor-panel"><p>No project selected.</p></div>'}
+            </div>
+          </section>
+        `;
+      };
+
+      const renderProjectRow = (project) => {
+        const cover = project.images?.[0]?.src;
+        return `
+          <button class="${classNames('project-row', project.id === state.selectedProjectId && 'is-selected')}" data-project="${escapeHtml(project.id)}">
+            <div class="drag-handle">::</div>
+            <div class="cover-thumb">${cover ? `<img src="${escapeHtml(normalizePath(cover))}" alt="" />` : '<span>No image</span>'}</div>
+            <div class="row-copy">
+              <strong>${escapeHtml(project.title)}</strong>
+              <p>${escapeHtml(project.summary)}</p>
+              <span>${escapeHtml(project.category)}</span>
+            </div>
+            <div><span class="${classNames('badge', project.status === 'published' ? 'is-live' : 'is-draft')}">${escapeHtml(project.status)}</span></div>
+            <label class="switch" aria-label="Toggle live">
+              <input type="checkbox" data-toggle-project="${escapeHtml(project.id)}" ${project.status === 'published' ? 'checked' : ''} />
+              <span></span>
+            </label>
+          </button>
+        `;
+      };
+
+      const renderProjectEditor = (project) => `
+        <div class="editor-panel">
+          <div class="panel-title">
+            <div>
+              <h2>Edit Project</h2>
+              <p>${escapeHtml(project.id)}</p>
+            </div>
+            <button class="danger-button" data-action="remove-project">Remove</button>
+          </div>
+          <div class="form-grid">
+            ${inputField('id', 'Project ID', project.id, 'project')}
+            ${numberField('order', 'Display Order', project.order, 'project')}
+            ${inputField('title', 'Title', project.title, 'project')}
+            ${inputField('category', 'Category', project.category, 'project')}
+            ${inputField('role', 'Role', project.role, 'project')}
+            <label class="field checkbox-field">
+              <span>Featured</span>
+              <input type="checkbox" data-project-field="featured" ${project.featured ? 'checked' : ''} />
+            </label>
+          </div>
+          ${textareaField('summary', 'Summary', project.summary, 'project')}
+          ${listEditor('outcomes', 'Outcomes', project.outcomes ?? [])}
+          ${listEditor('tools', 'Tools', project.tools ?? [])}
+          ${imageEditor(project.images ?? [])}
+        </div>
+      `;
+
+      const renderResume = () => {
+        const experiences = currentExperience();
+        const item = selectedExperience();
+        return `
+          <section class="workspace">
+            <div class="page-heading">
+              <div>
+                <h1>Resume Editor</h1>
+                <p>Manage your professional experience and skills.</p>
+              </div>
+              <div class="toolbar">
+                <a class="secondary-button" href="${studioData.base}${state.locale}/resume/" target="_blank">Preview</a>
+                <button class="secondary-button" data-action="save">Save Changes</button>
+              </div>
+            </div>
+            <div class="resume-grid">
+              <div class="entry-panel">
+                <div class="panel-title">
+                  <h2>Experience Entries</h2>
+                  <button class="icon-button" data-action="add-experience">+</button>
+                </div>
+                <div class="entry-list">
+                  ${experiences.map((experience, index) => `
+                    <button class="${classNames('entry-card', index === state.selectedExperienceIndex && 'is-selected')}" data-experience="${index}">
+                      <strong>${escapeHtml(experience.role)}</strong>
+                      <span>${escapeHtml(experience.company)}</span>
+                      <em>${escapeHtml(experience.period)}</em>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+              ${item ? renderExperienceEditor(item) : '<div class="editor-panel"><p>No experience selected.</p></div>'}
+            </div>
+            ${renderSkillsManager()}
+          </section>
+        `;
+      };
+
+      const renderExperienceEditor = (item) => `
+        <div class="editor-panel">
+          <div class="panel-title">
+            <div>
+              <h2>Edit Entry</h2>
+              <p>${escapeHtml(item.company)}</p>
+            </div>
+            <button class="danger-button" data-action="remove-experience">Remove</button>
+          </div>
+          <div class="form-grid">
+            ${inputField('role', 'Job Title', item.role, 'experience')}
+            ${inputField('company', 'Company / Organization', item.company, 'experience')}
+            ${inputField('period', 'Period', item.period, 'experience')}
+          </div>
+          <div class="nested-list">
+            <div class="nested-head">
+              <h3>Groups & Bullets</h3>
+              <button class="secondary-button" data-action="add-group">Add Group</button>
+            </div>
+            ${item.groups.map((group, groupIndex) => `
+              <div class="group-card">
+                <div class="group-head">
+                  <label class="field">
+                    <span>Group Label</span>
+                    <input data-group-field="label" data-group-index="${groupIndex}" value="${escapeHtml(group.label)}" placeholder="Optional label" />
+                  </label>
+                  <button class="text-button danger" data-remove-group="${groupIndex}">Remove group</button>
+                </div>
+                <div class="bullet-list">
+                  ${group.items.map((bullet, bulletIndex) => `
+                    <div class="bullet-row">
+                      <textarea data-bullet-index="${bulletIndex}" data-group-index="${groupIndex}" rows="2">${escapeHtml(bullet)}</textarea>
+                      <button class="text-button danger" data-remove-bullet="${groupIndex}:${bulletIndex}">Remove</button>
+                    </div>
+                  `).join('')}
+                </div>
+                <button class="text-button" data-add-bullet="${groupIndex}">Add bullet</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const renderSkillsManager = () => `
+        <div class="skills-panel">
+          <div class="panel-title">
+            <div>
+              <h2>Skills Manager</h2>
+              <p>Skills stay at resume level for the MVP.</p>
+            </div>
+          </div>
+          <div class="skills-grid">
+            ${(currentResume().skills ?? []).map((category, categoryIndex) => `
+              <div class="skill-card">
+                <label class="field">
+                  <span>Category</span>
+                  <input data-skill-category="${categoryIndex}" value="${escapeHtml(category.category)}" />
+                </label>
+                <div class="chip-editor">
+                  ${category.items.map((skill, skillIndex) => `
+                    <span class="editable-chip">
+                      <input data-skill="${categoryIndex}:${skillIndex}" value="${escapeHtml(skill)}" />
+                      <button data-remove-skill="${categoryIndex}:${skillIndex}">x</button>
+                    </span>
+                  `).join('')}
+                  <button class="text-button" data-add-skill="${categoryIndex}">Add skill</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const inputField = (name, label, value, scope) => `
+        <label class="field">
+          <span>${label}</span>
+          <input data-${scope}-field="${name}" value="${escapeHtml(value)}" />
+        </label>
+      `;
+
+      const numberField = (name, label, value, scope) => `
+        <label class="field">
+          <span>${label}</span>
+          <input type="number" min="1" data-${scope}-field="${name}" value="${escapeHtml(value)}" />
+        </label>
+      `;
+
+      const textareaField = (name, label, value, scope) => `
+        <label class="field wide">
+          <span>${label}</span>
+          <textarea data-${scope}-field="${name}" rows="5">${escapeHtml(value)}</textarea>
+        </label>
+      `;
+
+      const listEditor = (field, label, items) => `
+        <div class="nested-list compact">
+          <div class="nested-head">
+            <h3>${label}</h3>
+            <button class="secondary-button" data-add-project-list="${field}">Add</button>
+          </div>
+          ${items.map((item, index) => `
+            <div class="inline-row">
+              <input data-project-list="${field}:${index}" value="${escapeHtml(item)}" />
+              <button class="text-button danger" data-remove-project-list="${field}:${index}">Remove</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      const imageEditor = (images) => `
+        <div class="nested-list compact">
+          <div class="nested-head">
+            <h3>Images</h3>
+            <p>Upload API is included; MVP validates size and type before GitHub write.</p>
+          </div>
+          ${images.length === 0 ? '<p class="muted-copy">No images yet.</p>' : images.map((image) => `
+            <div class="image-row">
+              <img src="${escapeHtml(normalizePath(image.src))}" alt="" />
+              <div>
+                <strong>${escapeHtml(image.caption)}</strong>
+                <p>${escapeHtml(image.alt)}</p>
+                <small>${escapeHtml(image.src)}</small>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      const bindEvents = () => {
+        root.querySelectorAll('[data-section]').forEach((button) => {
+          button.addEventListener('click', () => {
+            state.section = button.dataset.section;
+            state.query = '';
+            render();
+          });
+        });
+
+        root.querySelectorAll('[data-field]').forEach((field) => {
+          const eventName = field.dataset.field === 'query' ? 'input' : 'change';
+          field.addEventListener(eventName, () => {
+            state[field.dataset.field] = field.value;
+            if (field.dataset.field !== 'query') markDirty();
+            render();
+          });
+        });
+
+        root.querySelectorAll('[data-action]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const action = button.dataset.action;
+            if (action === 'save') saveCurrent();
+            if (action === 'publish') publishCurrent();
+            if (action === 'add-project') addProject();
+            if (action === 'remove-project') removeProject();
+            if (action === 'add-experience') addExperience();
+            if (action === 'remove-experience') removeExperience();
+            if (action === 'add-group') addGroup();
+          });
+        });
+
+        root.querySelectorAll('[data-project]').forEach((row) => {
+          row.addEventListener('click', (event) => {
+            if (event.target.closest('input')) return;
+            state.selectedProjectId = row.dataset.project;
+            render();
+          });
+        });
+
+        root.querySelectorAll('[data-toggle-project]').forEach((toggle) => {
+          toggle.addEventListener('change', () => {
+            const project = currentProjects().find((item) => item.id === toggle.dataset.toggleProject);
+            if (!project) return;
+            project.status = toggle.checked ? 'published' : 'draft';
+            markDirty('Project status updated');
+            render();
+          });
+        });
+
+        root.querySelectorAll('[data-project-field]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const value = field.type === 'checkbox' ? field.checked : field.type === 'number' ? Number(field.value) : field.value;
+            const project = selectedProject();
+            if (!project) return;
+            Object.assign(project, { [field.dataset.projectField]: value });
+            if (field.dataset.projectField === 'id') state.selectedProjectId = value;
+            markDirty('Project updated');
+          });
+        });
+
+        root.querySelectorAll('[data-project-list]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const [listName, index] = field.dataset.projectList.split(':');
+            const project = selectedProject();
+            if (!project) return;
+            project[listName] = project[listName] ?? [];
+            project[listName][Number(index)] = field.value;
+            markDirty(`${listName} updated`);
+          });
+        });
+
+        root.querySelectorAll('[data-add-project-list]').forEach((button) => {
+          button.addEventListener('click', () => addProjectListItem(button.dataset.addProjectList));
+        });
+
+        root.querySelectorAll('[data-remove-project-list]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const [listName, index] = button.dataset.removeProjectList.split(':');
+            removeProjectListItem(listName, Number(index));
+          });
+        });
+
+        root.querySelectorAll('[data-experience]').forEach((button) => {
+          button.addEventListener('click', () => {
+            state.selectedExperienceIndex = Number(button.dataset.experience);
+            render();
+          });
+        });
+
+        root.querySelectorAll('[data-experience-field]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const item = selectedExperience();
+            if (!item) return;
+            Object.assign(item, { [field.dataset.experienceField]: field.value });
+            markDirty('Experience updated');
+          });
+        });
+
+        root.querySelectorAll('[data-group-field]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const item = selectedExperience();
+            if (!item) return;
+            Object.assign(item.groups[Number(field.dataset.groupIndex)], { [field.dataset.groupField]: field.value });
+            markDirty('Group updated');
+          });
+        });
+
+        root.querySelectorAll('[data-bullet-index]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const item = selectedExperience();
+            if (!item) return;
+            item.groups[Number(field.dataset.groupIndex)].items[Number(field.dataset.bulletIndex)] = field.value;
+            markDirty('Bullet updated');
+          });
+        });
+
+        root.querySelectorAll('[data-add-bullet]').forEach((button) => {
+          button.addEventListener('click', () => addBullet(Number(button.dataset.addBullet)));
+        });
+
+        root.querySelectorAll('[data-remove-bullet]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const [groupIndex, bulletIndex] = button.dataset.removeBullet.split(':').map(Number);
+            removeBullet(groupIndex, bulletIndex);
+          });
+        });
+
+        root.querySelectorAll('[data-remove-group]').forEach((button) => {
+          button.addEventListener('click', () => removeGroup(Number(button.dataset.removeGroup)));
+        });
+
+        root.querySelectorAll('[data-skill-category]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const resume = currentResume();
+            Object.assign(resume.skills[Number(field.dataset.skillCategory)], { category: field.value });
+            markDirty('Skills updated');
+          });
+        });
+
+        root.querySelectorAll('[data-skill]').forEach((field) => {
+          field.addEventListener('input', () => {
+            const [categoryIndex, skillIndex] = field.dataset.skill.split(':').map(Number);
+            currentResume().skills[categoryIndex].items[skillIndex] = field.value;
+            markDirty('Skill updated');
+          });
+        });
+
+        root.querySelectorAll('[data-add-skill]').forEach((button) => {
+          button.addEventListener('click', () => addSkill(Number(button.dataset.addSkill)));
+        });
+
+        root.querySelectorAll('[data-remove-skill]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const [categoryIndex, skillIndex] = button.dataset.removeSkill.split(':').map(Number);
+            removeSkill(categoryIndex, skillIndex);
+          });
+        });
+      };
+
+      const render = () => {
+        root.innerHTML = renderShell(state.section === 'portfolio' ? renderPortfolio() : renderResume());
+        bindEvents();
+      };
+
+      render();
+    </script>
+
+    <style is:global>
+      .studio-shell {
+        display: grid;
+        min-height: 100vh;
+        grid-template-columns: 264px 1fr;
+      }
+
+      .studio-sidebar {
+        position: sticky;
+        top: 0;
+        display: flex;
+        height: 100vh;
+        flex-direction: column;
+        border-right: 1px solid #c8cedd;
+        background: #f1f3f8;
+        padding: 28px 16px;
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 42px;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 8px;
+        background: #0b57d0;
+        color: #fff;
+        font-weight: 800;
+      }
+
+      .brand-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #064bbd;
+        line-height: 1.05;
+      }
+
+      .brand-subtitle,
+      .panel-title p,
+      .page-heading p,
+      .record-count,
+      .muted-copy {
+        color: #4c5263;
+      }
+
+      .side-nav {
+        display: grid;
+        gap: 10px;
+      }
+
+      .side-link {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        border-radius: 8px;
+        padding: 13px 16px;
+        color: #3d4353;
+        font-size: 15px;
+        font-weight: 650;
+        text-align: left;
+        text-decoration: none;
+      }
+
+      .side-link.is-active {
+        background: #e4ebfb;
+        color: #0751c6;
+      }
+
+      .side-link.is-muted {
+        font-weight: 550;
+      }
+
+      .publish-button {
+        margin-top: auto;
+        border-radius: 8px;
+        background: #0b57d0;
+        padding: 15px;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 750;
+      }
+
+      .studio-main {
+        min-width: 0;
+      }
+
+      .studio-topbar {
+        display: flex;
+        min-height: 64px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        border-bottom: 1px solid #c8cedd;
+        background: #fff;
+        padding: 12px 32px;
+      }
+
+      .search-input {
+        width: min(100%, 360px);
+        border: 1px solid #c8cedd;
+        border-radius: 999px;
+        padding: 12px 20px;
+        background: #f7f8fb;
+      }
+
+      .topbar-actions,
+      .toolbar,
+      .panel-title,
+      .nested-head,
+      .group-head,
+      .inline-row,
+      .bullet-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .toolbar {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .locale-select,
+      .control,
+      .secondary-button,
+      .primary-button,
+      .danger-button,
+      .icon-button {
+        border: 1px solid #c8cedd;
+        border-radius: 6px;
+        background: #fff;
+        padding: 10px 14px;
+        font-weight: 700;
+      }
+
+      .primary-button {
+        border-color: #0b57d0;
+        background: #0b57d0;
+        color: #fff;
+      }
+
+      .danger-button {
+        border-color: transparent;
+        color: #c5221f;
+      }
+
+      .icon-button {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: #2f66df;
+        color: #fff;
+      }
+
+      .status-pill {
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: #eef1f7;
+        color: #3d4353;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .status-pill.is-success { background: #e5f4ea; color: #137333; }
+      .status-pill.is-warning { background: #fff5d7; color: #8a5a00; }
+      .status-pill.is-error { background: #fce8e6; color: #c5221f; }
+
+      .workspace {
+        padding: 36px 32px 64px;
+      }
+
+      .page-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      .page-heading h1 {
+        font-size: 34px;
+        font-weight: 850;
+        letter-spacing: 0;
+      }
+
+      .portfolio-grid {
+        display: grid;
+        grid-template-columns: minmax(520px, 1.1fr) minmax(420px, 0.9fr);
+        gap: 24px;
+      }
+
+      .resume-grid {
+        display: grid;
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .table-panel,
+      .editor-panel,
+      .entry-panel,
+      .skills-panel {
+        border: 1px solid #c8cedd;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgb(23 26 33 / 8%);
+      }
+
+      .editor-panel,
+      .entry-panel,
+      .skills-panel {
+        padding: 26px;
+      }
+
+      .skills-panel {
+        margin-top: 24px;
+      }
+
+      .panel-title {
+        justify-content: space-between;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #c8cedd;
+        padding-bottom: 20px;
+      }
+
+      .panel-title h2 {
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .table-head,
+      .project-row {
+        display: grid;
+        grid-template-columns: 30px 72px minmax(160px, 1fr) 84px 52px;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .table-head {
+        border-bottom: 1px solid #c8cedd;
+        background: #e9ebef;
+        padding: 14px 24px;
+        color: #3d4353;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .project-row {
+        width: 100%;
+        border-bottom: 1px solid #eef1f7;
+        padding: 22px 24px;
+        text-align: left;
+      }
+
+      .project-row.is-selected {
+        background: #f3f7ff;
+      }
+
+      .drag-handle {
+        color: #a8afc0;
+        font-weight: 800;
+      }
+
+      .cover-thumb {
+        display: grid;
+        width: 68px;
+        height: 48px;
+        place-items: center;
+        overflow: hidden;
+        border: 1px solid #c8cedd;
+        border-radius: 8px;
+        background: #f1f3f8;
+        color: #7b8191;
+        font-size: 12px;
+      }
+
+      .cover-thumb img,
+      .image-row img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .row-copy strong {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 16px;
+      }
+
+      .row-copy p {
+        overflow: hidden;
+        margin-bottom: 8px;
+        color: #4c5263;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-copy span,
+      .badge {
+        display: inline-flex;
+        border: 1px solid #c8cedd;
+        border-radius: 5px;
+        padding: 4px 8px;
+        background: #f7f8fb;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .badge.is-live { background: #dfe7ff; color: #243b86; }
+      .badge.is-draft { background: #f1f3f8; color: #5f6677; }
+
+      .switch input {
+        display: none;
+      }
+
+      .switch span {
+        display: block;
+        width: 44px;
+        height: 24px;
+        border-radius: 999px;
+        background: #d9dde6;
+        position: relative;
+      }
+
+      .switch span::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #fff;
+        transition: transform 0.16s ease;
+      }
+
+      .switch input:checked + span {
+        background: #0b57d0;
+      }
+
+      .switch input:checked + span::after {
+        transform: translateX(20px);
+      }
+
+      .record-count {
+        padding: 18px 24px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .field span {
+        color: #3d4353;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .field input,
+      .field textarea,
+      .inline-row input,
+      .bullet-row textarea,
+      .editable-chip input {
+        width: 100%;
+        border: 1px solid #c8cedd;
+        border-radius: 6px;
+        padding: 12px 14px;
+        background: #fff;
+      }
+
+      .field textarea,
+      .bullet-row textarea {
+        resize: vertical;
+      }
+
+      .field.wide {
+        margin-bottom: 18px;
+      }
+
+      .checkbox-field {
+        align-content: end;
+      }
+
+      .checkbox-field input {
+        width: 20px;
+        height: 20px;
+      }
+
+      .nested-list {
+        display: grid;
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      .nested-list.compact {
+        border-top: 1px solid #eef1f7;
+        padding-top: 18px;
+      }
+
+      .nested-head {
+        justify-content: space-between;
+      }
+
+      .nested-head h3 {
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .group-card,
+      .skill-card {
+        border: 1px solid #dce1ec;
+        border-radius: 8px;
+        padding: 16px;
+        background: #fbfcff;
+      }
+
+      .group-head {
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .bullet-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .inline-row,
+      .bullet-row {
+        align-items: flex-start;
+      }
+
+      .text-button {
+        color: #0b57d0;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .text-button.danger,
+      .danger {
+        color: #c5221f;
+      }
+
+      .entry-list,
+      .skills-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .entry-card {
+        display: grid;
+        gap: 7px;
+        width: 100%;
+        border: 1px solid #c8cedd;
+        border-radius: 8px;
+        padding: 18px;
+        text-align: left;
+      }
+
+      .entry-card.is-selected {
+        border: 2px solid #0b57d0;
+        background: #f3f7ff;
+      }
+
+      .entry-card strong {
+        font-size: 17px;
+      }
+
+      .entry-card span {
+        color: #064bbd;
+      }
+
+      .entry-card em {
+        color: #4c5263;
+        font-style: normal;
+        font-weight: 650;
+      }
+
+      .skills-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .chip-editor {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .editable-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border-radius: 999px;
+        background: #eef1f7;
+        padding: 6px 8px 6px 12px;
+      }
+
+      .editable-chip input {
+        width: 140px;
+        border: 0;
+        background: transparent;
+        padding: 0;
+      }
+
+      .image-row {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .image-row img {
+        height: 62px;
+        border-radius: 6px;
+        border: 1px solid #c8cedd;
+      }
+
+      .image-row p,
+      .image-row small {
+        color: #4c5263;
+      }
+
+      @media (max-width: 1100px) {
+        .studio-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .studio-sidebar {
+          position: relative;
+          height: auto;
+        }
+
+        .portfolio-grid,
+        .resume-grid,
+        .skills-grid,
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </body>
+</html>
