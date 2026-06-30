@@ -111,10 +111,6 @@ const studioData = {
         };
       };
 
-      const clearIdentityHash = () => {
-        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-      };
-
       const identityUser = (user) => {
         if (!user) return null;
         return {
@@ -156,25 +152,17 @@ const studioData = {
         return { authorization: `Bearer ${token}` };
       };
 
-      const openIdentityRoute = (identity) => {
+      const setIdentityRouteMessage = () => {
         const route = identityRouteFromHash();
         if (!route) return false;
-
-        if (identity.store?.verifyToken) {
-          identity.store.verifyToken(route.type, route.token);
-          clearIdentityHash();
-          const labels = {
-            confirmation: 'Confirming email...',
-            invite: 'Complete your invite by setting a password.',
-            recovery: 'Reset your password to continue.',
-            email_change: 'Confirming email change...',
-          };
-          setMessage(labels[route.type] || 'Completing Identity flow...', 'neutral');
-          return true;
-        }
-
-        setMessage('Netlify Identity token flow is unavailable. Please refresh this invite link.', 'error');
-        return false;
+        const labels = {
+          confirmation: 'Confirming email...',
+          invite: 'Opening invite password setup...',
+          recovery: 'Opening password reset...',
+          email_change: 'Confirming email change...',
+        };
+        setMessage(labels[route.type] || 'Opening Identity flow...', 'neutral');
+        return true;
       };
 
       const initAuth = (attempt = 0) => {
@@ -193,10 +181,7 @@ const studioData = {
         identity.on('init', (user) => {
           state.authReady = true;
           state.user = identityUser(user);
-          if (openIdentityRoute(identity)) {
-            render();
-            return;
-          }
+          setIdentityRouteMessage();
           render();
         });
 
@@ -219,7 +204,12 @@ const studioData = {
           render();
         });
 
-        identity.init();
+        if (identity.store?.gotrue) {
+          state.authReady = true;
+          state.user = identityUser(identity.currentUser?.());
+          setIdentityRouteMessage();
+          render();
+        }
       };
 
       const validatePortfolio = (portfolio) => {
