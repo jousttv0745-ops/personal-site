@@ -12,13 +12,23 @@ interface ProjectImage {
 
 interface Project {
   id: string;
-  order: number;
-  status: 'draft' | 'published';
-  featured: boolean;
+  order?: number;
+  status?: 'draft' | 'published';
+  featured?: boolean;
   title: string;
   category: string;
   summary: string;
   role: string;
+  outcomes?: string[];
+  tools?: string[];
+  descriptions?: ProjectDescription[];
+  images?: ProjectImage[];
+}
+
+interface NormalizedProject extends Project {
+  order: number;
+  status: 'draft' | 'published';
+  featured: boolean;
   outcomes: string[];
   tools: string[];
   descriptions: ProjectDescription[];
@@ -38,6 +48,16 @@ interface Content {
 const { content } = Astro.props as { content: Content };
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const projects = content.projects
+  .map((project): NormalizedProject => ({
+    ...project,
+    order: project.order ?? 100,
+    status: project.status ?? 'published',
+    featured: project.featured ?? false,
+    outcomes: project.outcomes ?? [],
+    tools: project.tools ?? [],
+    descriptions: project.descriptions ?? [],
+    images: project.images ?? [],
+  }))
   .filter((project) => project.status === 'published')
   .sort((a, b) => {
     if (a.featured !== b.featured) return a.featured ? -1 : 1;
