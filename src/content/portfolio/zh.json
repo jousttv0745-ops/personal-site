@@ -8,20 +8,49 @@
   "toolsLabel": "工具 / 技術",
   "projects": [
     {
-      "id": "keyword",
-      "order": 10,
-      "status": "published",
+      "outcomes": [
+        "初步建立可量化的 PM 工時節省機制，將每週專案檢視、規格整理與任務拆解納入 AI 輔助流程",
+        "用 AI 將 PRD、Schema、Vocabulary、SDK spec 轉換為 GitHub 上可追蹤、可回溯的版本化規格，降低文件分散與決策遺失風險"
+      ],
+      "summary": "在 Rich Data 專案中，設計一套 AI-assisted、human-governed 的資料產品工作流：AI 協助擴大資訊蒐集、推演 Schema / Vocabulary 與 SDK 調用邏輯、產製 PRD 草稿，並透過 GitHub 與 Claude Code 將規格更新轉換為可追蹤的 ticket / issue 草稿。整個流程以人類 PM 作為決策與治理核心，透過 CLAUDE.md、GitHub 版本控管與貼標正確率門檻，確保 AI 產出能被審核、校正並回饋到產品迭代中。",
       "featured": true,
-      "title": "廣告高潛力關鍵字圈選小工具",
-      "category": "內部工具",
-      "summary": "以 Claude skill + Looker Studio 協助廣告業務、企劃及行銷人員，從站內流量數據中查詢並自動篩選高潛力關鍵字，生成 GAM 投放清單及投放建議，大幅縮短人工整理時間。",
+      "order": 1,
+      "status": "published",
       "role": "Owner",
+      "title": "AI 原生的 Rich Data 產品工作流",
+      "images": [
+        {
+          "src": "/uploads/tvbs-rich-data-ai-workflow-zh.png",
+          "alt": "AI 原生的 Rich Data 產品工作流程圖",
+          "caption": "AI 協作的 Rich Data 產品工作流程"
+        }
+      ],
+      "id": "aiflow",
+      "tools": [
+        "Claude",
+        "Claude code",
+        "Codex",
+        "Gemini",
+        "Hermes",
+        "GitHub",
+        "ClickUp",
+        "Antigravity",
+        "Prompt Design"
+      ],
+      "category": "流程設計"
+    },
+    {
       "outcomes": [
         "業務作業時間縮短 60%",
         "已被超過 2 個部門採用"
       ],
-      "tools": ["SQL", "Looker Studio", "Claude API"],
+      "summary": "以 Claude skill + Looker Studio 協助廣告業務、企劃及行銷人員，從站內流量數據中查詢並自動篩選高潛力關鍵字，生成 GAM 投放清單及投放建議，大幅縮短人工整理時間。",
+      "featured": true,
+      "order": 10,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [],
+      "title": "廣告高潛力關鍵字圈選小工具",
       "images": [
         {
           "src": "assets/keyword-demo-1.png",
@@ -33,44 +62,52 @@
           "alt": "Claude AI 對話介面生成廣告關鍵字投放規劃",
           "caption": "Step 2 — Claude AI"
         }
-      ]
+      ],
+      "id": "keyword",
+      "tools": [
+        "SQL",
+        "Looker Studio",
+        "Claude API"
+      ],
+      "category": "內部工具"
     },
     {
-      "id": "ops",
-      "order": 20,
-      "status": "published",
-      "featured": false,
-      "title": "建立 Digital-First 的內容營運模型",
-      "category": "流程設計",
-      "summary": "主導重建數位策展專題工作流程，協調編輯、設計、工程、社群與記者團隊，推動組織從「紙本內容轉網頁」模式轉向以使用者體驗為核心的數位主導內容營運模型。",
-      "role": "Owner",
       "outcomes": [
         "建立跨職能製作流程與固定排程節奏",
         "每季穩定產出大型策展 ×1、小型 ×1"
       ],
-      "tools": ["跨職能協調", "流程設計", "編輯策略", "專案管理"],
+      "summary": "主導重建數位策展專題工作流程，協調編輯、設計、工程、社群與記者團隊，推動組織從「紙本內容轉網頁」模式轉向以使用者體驗為核心的數位主導內容營運模型。",
+      "featured": false,
+      "order": 20,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [],
+      "title": "建立 Digital-First 的內容營運模型",
       "images": [
         {
           "src": "assets/ops-demo-1.png",
           "alt": "數位策展製作週期與季度排程規劃圖",
           "caption": "製作週期規劃與季度排程"
         }
-      ]
+      ],
+      "id": "ops",
+      "tools": [
+        "跨職能協調",
+        "流程設計",
+        "編輯策略",
+        "專案管理"
+      ],
+      "category": "流程設計"
     },
     {
-      "id": "web",
-      "order": 30,
-      "status": "published",
-      "featured": false,
-      "title": "網站改版專案",
-      "category": "專案管理",
-      "summary": "主導兩個網站改版的規劃及專案管理，涵蓋品牌視覺年輕化、網站體驗優化、新功能開發與整體內容策略。",
-      "role": "Owner",
       "outcomes": [
         "改版皆如期上線"
       ],
-      "tools": ["專案管理", "品牌策略", "SEO", "UX 規劃", "設計開發協作", "Figma"],
+      "summary": "主導兩個網站改版的規劃及專案管理，涵蓋品牌視覺年輕化、網站體驗優化、新功能開發與整體內容策略。",
+      "featured": false,
+      "order": 30,
+      "status": "published",
+      "role": "Owner",
       "descriptions": [
         {
           "label": "國家人權博物館官方網站改版",
@@ -81,6 +118,7 @@
           "text": "包括內容議題設定、倡議審核及網頁新功能開發上架（2024/11～2025/03），推動搜尋優化、專屬頁面規劃及設計開發、整體內容體驗優化。"
         }
       ],
+      "title": "網站改版專案",
       "images": [
         {
           "src": "assets/web-demo-1.png",
@@ -92,7 +130,17 @@
           "alt": "Talent in Taiwan 專案頁面示意",
           "caption": "Talent, in Taiwan"
         }
-      ]
+      ],
+      "id": "web",
+      "tools": [
+        "專案管理",
+        "品牌策略",
+        "SEO",
+        "UX 規劃",
+        "設計開發協作",
+        "Figma"
+      ],
+      "category": "專案管理"
     }
   ]
 }
