@@ -2,16 +2,18 @@ backend:
   name: github
   repo: jousttv0745-ops/personal-site
   branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
   squash_merges: true
 
 publish_mode: editorial_workflow
 
 media_folder: public/uploads
-public_folder: /personal-site/uploads
+public_folder: /uploads
 
-site_url: https://jousttv0745-ops.github.io/personal-site
-display_url: https://jousttv0745-ops.github.io/personal-site
-logo_url: /personal-site/favicon.svg
+site_url: /
+display_url: /
+logo_url: /favicon.svg
 
 collections:
   - name: about

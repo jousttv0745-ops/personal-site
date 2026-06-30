@@ -45,7 +45,8 @@ const projects = content.projects
   });
 
 const imageUrl = (src: string) => {
-  if (src.startsWith('http') || src.startsWith('/')) return src;
+  if (src.startsWith('http')) return src;
+  if (src.startsWith('/')) return `${base}${src.replace(/^\//, '')}`;
   return `${base}${src}`;
 };
 ---
