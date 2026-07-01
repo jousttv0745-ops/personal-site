@@ -1143,6 +1143,29 @@ const studioData = {
         color: #4c5263;
       }
 
+      #studio-root button,
+      #studio-root a,
+      #studio-root input,
+      #studio-root select,
+      #studio-root textarea {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #studio-root button,
+      #studio-root a[href],
+      #studio-root label.switch {
+        cursor: pointer;
+      }
+
+      #studio-root button:focus-visible,
+      #studio-root a:focus-visible,
+      #studio-root input:focus-visible,
+      #studio-root select:focus-visible,
+      #studio-root textarea:focus-visible {
+        outline: 3px solid rgba(11, 87, 208, 0.24);
+        outline-offset: 2px;
+      }
+
       .side-nav {
         display: grid;
         gap: 10px;
@@ -1153,17 +1176,31 @@ const studioData = {
         width: 100%;
         align-items: center;
         border-radius: 8px;
+        border: 0;
+        background: transparent;
         padding: 13px 16px;
         color: #3d4353;
         font-size: 15px;
         font-weight: 650;
         text-align: left;
         text-decoration: none;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .side-link:hover {
+        background: #e9eef9;
+        color: #0b57d0;
+        transform: translateX(2px);
+      }
+
+      .side-link:active {
+        transform: translateX(1px) scale(0.99);
       }
 
       .side-link.is-active {
         background: #e4ebfb;
         color: #0751c6;
+        box-shadow: inset 3px 0 0 #0b57d0;
       }
 
       .side-link.is-muted {
@@ -1265,6 +1302,33 @@ const studioData = {
         background: #fff;
         padding: 10px 14px;
         font-weight: 700;
+        transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .secondary-button,
+      .primary-button,
+      .danger-button,
+      .icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        text-decoration: none;
+      }
+
+      .secondary-button:hover,
+      .control:hover,
+      .locale-select:hover {
+        border-color: #9aadd5;
+        background: #f4f7ff;
+        box-shadow: 0 4px 12px rgba(40, 63, 112, 0.12);
+      }
+
+      .secondary-button:active,
+      .control:active,
+      .locale-select:active {
+        transform: translateY(1px);
       }
 
       .primary-button {
@@ -1273,9 +1337,29 @@ const studioData = {
         color: #fff;
       }
 
+      .primary-button:hover {
+        border-color: #0748b4;
+        background: #0748b4;
+        box-shadow: 0 8px 18px rgba(11, 87, 208, 0.22);
+        transform: translateY(-1px);
+      }
+
+      .primary-button:active {
+        transform: translateY(1px);
+      }
+
       .danger-button {
         border-color: transparent;
         color: #c5221f;
+      }
+
+      .danger-button:hover {
+        border-color: #f3b8b4;
+        background: #fce8e6;
+      }
+
+      .danger-button:active {
+        transform: translateY(1px);
       }
 
       .icon-button {
@@ -1284,6 +1368,23 @@ const studioData = {
         border-radius: 999px;
         background: #2f66df;
         color: #fff;
+      }
+
+      .icon-button:hover {
+        background: #174ebf;
+        box-shadow: 0 8px 16px rgba(47, 102, 223, 0.24);
+        transform: translateY(-1px);
+      }
+
+      .icon-button:active {
+        transform: translateY(1px);
+      }
+
+      #studio-root button:disabled {
+        cursor: not-allowed;
+        opacity: 0.58;
+        box-shadow: none;
+        transform: none;
       }
 
       .status-pill {
@@ -1457,11 +1558,25 @@ const studioData = {
       .project-row {
         width: 100%;
         border-bottom: 1px solid #eef1f7;
+        border-left: 3px solid transparent;
+        background: #fff;
         padding: 22px 24px;
         text-align: left;
+        transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .project-row:hover {
+        border-left-color: #9bb1dc;
+        background: #f8faff;
+        box-shadow: inset 0 0 0 1px #e1e8f8;
+      }
+
+      .project-row:active {
+        transform: scale(0.997);
       }
 
       .project-row.is-selected {
+        border-left-color: #0b57d0;
         background: #f3f7ff;
       }
 
@@ -1530,6 +1645,11 @@ const studioData = {
         border-radius: 999px;
         background: #d9dde6;
         position: relative;
+        transition: background 160ms ease, box-shadow 160ms ease;
+      }
+
+      .switch:hover span {
+        box-shadow: 0 0 0 4px rgba(11, 87, 208, 0.10);
       }
 
       .switch span::after {
@@ -1585,6 +1705,24 @@ const studioData = {
         border-radius: 6px;
         padding: 12px 14px;
         background: #fff;
+        transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      }
+
+      .field input:hover,
+      .field textarea:hover,
+      .inline-row input:hover,
+      .bullet-row textarea:hover,
+      .editable-chip input:hover {
+        border-color: #9aadd5;
+      }
+
+      .field input:focus,
+      .field textarea:focus,
+      .inline-row input:focus,
+      .bullet-row textarea:focus,
+      .editable-chip input:focus {
+        border-color: #0b57d0;
+        box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.12);
       }
 
       .field textarea,
@@ -1650,14 +1788,34 @@ const studioData = {
       }
 
       .text-button {
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
         color: #0b57d0;
         font-weight: 750;
+        padding: 6px 8px;
         white-space: nowrap;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .text-button:hover {
+        background: #eaf1ff;
+        color: #0748b4;
+      }
+
+      .text-button:active {
+        transform: translateY(1px);
       }
 
       .text-button.danger,
       .danger {
         color: #c5221f;
+      }
+
+      .text-button.danger:hover,
+      .danger:hover {
+        background: #fce8e6;
+        color: #a1120f;
       }
 
       .entry-list,
@@ -1672,8 +1830,21 @@ const studioData = {
         width: 100%;
         border: 1px solid #c8cedd;
         border-radius: 8px;
+        background: #fff;
         padding: 18px;
         text-align: left;
+        transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .entry-card:hover {
+        border-color: #9bb1dc;
+        background: #f8faff;
+        box-shadow: 0 6px 14px rgba(40, 63, 112, 0.10);
+        transform: translateY(-1px);
+      }
+
+      .entry-card:active {
+        transform: translateY(1px);
       }
 
       .entry-card.is-selected {
@@ -1713,6 +1884,34 @@ const studioData = {
         border-radius: 999px;
         background: #eef1f7;
         padding: 6px 8px 6px 12px;
+        transition: background 160ms ease, box-shadow 160ms ease;
+      }
+
+      .editable-chip:hover {
+        background: #e4ebfb;
+        box-shadow: 0 3px 10px rgba(40, 63, 112, 0.10);
+      }
+
+      .editable-chip button {
+        display: grid;
+        width: 22px;
+        height: 22px;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #4c5263;
+        font-weight: 800;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .editable-chip button:hover {
+        background: #d5dded;
+        color: #17201a;
+      }
+
+      .editable-chip button:active {
+        transform: scale(0.92);
       }
 
       .editable-chip input {
