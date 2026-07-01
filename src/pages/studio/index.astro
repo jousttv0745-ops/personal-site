@@ -76,14 +76,17 @@ const studioData = {
         syncStatusPill();
       };
 
-      const rememberDraft = (result, kind) => {
+      const rememberDraft = (result, kind, mode = 'draft') => {
         if (!result?.previewUrl && !result?.prUrl) return;
         state.lastDraft = {
           kind,
           locale: state.locale,
+          mode,
           branch: result.branch || '',
           previewUrl: result.previewUrl || '',
           prUrl: result.prUrl || '',
+          warning: result.warning || '',
+          readyForReview: result.readyForReview ?? null,
           savedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
       };
@@ -315,8 +318,8 @@ const studioData = {
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.message || 'Publish PR failed');
-          rememberDraft(result, state.section);
-          setMessage('Publish PR ready.', 'success');
+          rememberDraft(result, state.section, 'publish');
+          setMessage(result.warning || 'Publish PR is ready to merge.', result.warning ? 'warning' : 'success');
         } catch (error) {
           setMessage(error.message, 'error');
         } finally {
@@ -535,7 +538,10 @@ const studioData = {
               <a class="side-link is-muted" href="${studioData.base}admin/">Legacy CMS</a>
               <a class="side-link is-muted" href="${studioData.base}zh/about/">Public Site</a>
             </nav>
-            <button class="publish-button" data-action="publish">Publish Site</button>
+            <button class="publish-button" data-action="publish" ${state.saving ? 'disabled' : ''}>
+              <span>${state.saving ? 'Working...' : 'Publish Draft'}</span>
+              <small>Prepare PR to merge</small>
+            </button>
           </aside>
 
           <main class="studio-main">
@@ -567,19 +573,24 @@ const studioData = {
       const renderDraftPanel = () => {
         const draft = state.lastDraft;
         if (!draft || draft.kind !== state.section || draft.locale !== state.locale) return '';
+        const isPublish = draft.mode === 'publish';
         return `
           <section class="draft-panel" aria-label="Saved draft links">
             <div>
-              <p class="draft-kicker">Saved draft ${escapeHtml(draft.savedAt)}</p>
-              <h2>Preview is ready to check</h2>
-              <p>Netlify previews can take a short moment to refresh. If a change is inside a collapsed portfolio card, open that card on the preview page.</p>
+              <p class="draft-kicker">${isPublish ? 'Publish PR ready' : 'Saved draft'} ${escapeHtml(draft.savedAt)}</p>
+              <h2>${isPublish ? 'Ready to publish on GitHub' : 'Preview is ready to check'}</h2>
+              <p>${isPublish ? escapeHtml(draft.warning || 'Open the PR, wait for checks if GitHub shows any, then merge it to update the public GitHub Pages site.') : 'Netlify previews can take a short moment to refresh. If a change is inside a collapsed portfolio card, open that card on the preview page.'}</p>
             </div>
             <div class="draft-actions">
+              ${isPublish && draft.prUrl ? `
+                <a class="primary-button" href="${escapeHtml(draft.prUrl)}" target="_blank" rel="noreferrer">Open PR to Merge</a>
+                <button class="secondary-button" data-copy-url="${escapeHtml(draft.prUrl)}" data-copy-label="PR URL">Copy PR URL</button>
+              ` : ''}
               ${draft.previewUrl ? `
-                <a class="primary-button" href="${escapeHtml(draft.previewUrl)}" target="_blank" rel="noreferrer">Open Preview</a>
+                <a class="${isPublish ? 'secondary-button' : 'primary-button'}" href="${escapeHtml(draft.previewUrl)}" target="_blank" rel="noreferrer">Open Preview</a>
                 <button class="secondary-button" data-copy-url="${escapeHtml(draft.previewUrl)}" data-copy-label="Preview URL">Copy Preview URL</button>
               ` : ''}
-              ${draft.prUrl ? `
+              ${!isPublish && draft.prUrl ? `
                 <a class="secondary-button" href="${escapeHtml(draft.prUrl)}" target="_blank" rel="noreferrer">Open PR</a>
                 <button class="secondary-button" data-copy-url="${escapeHtml(draft.prUrl)}" data-copy-label="PR URL">Copy PR URL</button>
               ` : ''}
@@ -1110,13 +1121,47 @@ const studioData = {
       }
 
       .publish-button {
+        display: grid;
+        gap: 3px;
         margin-top: auto;
+        border: 0;
         border-radius: 8px;
         background: #0b57d0;
         padding: 15px;
         color: #fff;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(11, 87, 208, 0.22);
+        text-align: center;
+        transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .publish-button span {
         font-size: 16px;
         font-weight: 750;
+      }
+
+      .publish-button small {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .publish-button:hover {
+        background: #0748b4;
+        box-shadow: 0 10px 22px rgba(11, 87, 208, 0.28);
+        transform: translateY(-1px);
+      }
+
+      .publish-button:active {
+        transform: translateY(1px);
+      }
+
+      .publish-button:disabled {
+        cursor: wait;
+        opacity: 0.72;
+        transform: none;
       }
 
       .studio-main {

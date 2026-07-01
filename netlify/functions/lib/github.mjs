@@ -75,6 +75,25 @@ export const github = async (path, options = {}) => {
   return body;
 };
 
+export const githubGraphql = async (query, variables = {}) => {
+  const config = getConfig();
+  const response = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      accept: 'application/vnd.github+json',
+      authorization: `Bearer ${config.token}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  const body = await response.json();
+  if (!response.ok || body.errors?.length) {
+    throw new Error(body.errors?.[0]?.message || `GitHub GraphQL failed with ${response.status}`);
+  }
+  return body.data;
+};
+
 export const contentPath = (kind, locale) => {
   if (!['resume', 'portfolio'].includes(kind)) throw new Error('Invalid content kind.');
   if (!['zh', 'en'].includes(locale)) throw new Error('Invalid locale.');
@@ -171,9 +190,26 @@ export const ensurePullRequest = async ({ branch, title, body }) => {
   });
 };
 
+export const markPullRequestReady = async (pullRequestId) => {
+  if (!pullRequestId) throw new Error('Pull request node id is required.');
+  return githubGraphql(
+    `
+      mutation MarkPullRequestReady($pullRequestId: ID!) {
+        markPullRequestReadyForReview(input: { pullRequestId: $pullRequestId }) {
+          pullRequest {
+            number
+            url
+            isDraft
+          }
+        }
+      }
+    `,
+    { pullRequestId },
+  );
+};
+
 export const buildPreviewUrl = ({ prNumber, kind, locale }) => {
   const config = getConfig();
   if (!prNumber || !config.netlifySiteName) return null;
   return `https://deploy-preview-${prNumber}--${config.netlifySiteName}.netlify.app${previewPath(kind, locale)}`;
 };
-
