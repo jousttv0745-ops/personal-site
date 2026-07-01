@@ -32,10 +32,11 @@ Properties:
 
 | Property | Description |
 | --- | --- |
+| `page_title` | Human-readable page name, such as `作品集`, `履歷`, or `About`. |
 | `page` | Logical page name: `about`, `resume`, or `portfolio`. |
 | `lang` | Page language: `zh` or `en`. |
 | `path` | Browser pathname. |
-| `title` | Document title. |
+| `document_title` | Browser document title. |
 | `url` | Full browser URL. |
 
 ### `click`
@@ -46,39 +47,21 @@ Properties:
 
 | Property | Description |
 | --- | --- |
-| `click_type` | Interaction group, such as `download`, `portfolio`, or `contact`. |
-| `click_label` | Human-readable label, such as `email`, `linkedin`, or a project title. |
-| `project_id` | Portfolio project ID when applicable. |
+| `click_element` | Interaction group, such as `portfolio` or `contact`. |
+| `click_title` | Clicked item identifier, such as a project ID, `email`, or `linkedin`. |
 | `href` | Link URL when the clicked element is an anchor. |
+| `page_title` | Human-readable page name. |
 | `page` | Logical page name. |
 | `lang` | Page language. |
 | `path` | Browser pathname. |
 
 ## Current Click Coverage
 
-| Interaction | `click_type` | `click_label` | Status |
+| Interaction | `click_element` | `click_title` | Status |
 | --- | --- | --- | --- |
-| Expand portfolio project | `portfolio` | Project title | Implemented |
+| Expand portfolio project | `portfolio` | Project ID | Implemented |
 | Click email link | `contact` | `email` | Implemented |
 | Click LinkedIn link | `contact` | `linkedin` | Implemented |
-| Download resume | `download` | Suggested: `resume_pdf` | Ready for future download link |
-
-## Adding Resume Download Tracking
-
-When a real resume download asset is added, apply the attributes below to the download link:
-
-```html
-<a
-  href="/downloads/resume.pdf"
-  download
-  data-analytics-click="download"
-  data-analytics-label="resume_pdf"
->
-  Download Resume
-</a>
-```
-
-No additional JavaScript is needed.
 
 ## Privacy and Noise Control
 

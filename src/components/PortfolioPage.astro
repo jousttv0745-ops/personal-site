@@ -87,8 +87,7 @@ const imageUrl = (src: string) => {
         aria-expanded="false"
         aria-controls={`detail-${project.id}`}
         data-analytics-click="portfolio"
-        data-analytics-label={project.title}
-        data-analytics-project={project.id}
+        data-analytics-title={project.id}
       >
         <div class="flex items-start gap-6 flex-1 min-w-0">
           <span class="section-label pt-1 shrink-0 w-6">{String(index + 1).padStart(2, '0')}</span>

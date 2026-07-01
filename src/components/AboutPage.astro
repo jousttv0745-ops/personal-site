@@ -61,7 +61,7 @@ const { content } = Astro.props as { content: Content };
       <li>
         <a href={`mailto:${content.contact.email}`}
            data-analytics-click="contact"
-           data-analytics-label="email"
+           data-analytics-title="email"
            class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
           {content.contact.email}
         </a>
@@ -70,7 +70,7 @@ const { content } = Astro.props as { content: Content };
         <a href={content.contact.linkedin}
            target="_blank" rel="noopener"
            data-analytics-click="contact"
-           data-analytics-label="linkedin"
+           data-analytics-title="linkedin"
            class="font-medium text-[#0a0a0a] hover:text-blue-600 transition-colors">
           LinkedIn →
         </a>

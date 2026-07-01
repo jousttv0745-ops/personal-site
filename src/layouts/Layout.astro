@@ -29,6 +29,10 @@ const otherLang    = lang === 'zh' ? 'en' : 'zh';
 const langLabel    = lang === 'zh' ? 'EN' : '中';
 const displayName  = lang === 'zh' ? '杜韋樺' : 'Tu, Wei-Hua';
 const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' }[page];
+const analyticsPageTitle = {
+  zh: { about: '關於我', resume: '履歷', portfolio: '作品集' },
+  en: { about: 'About', resume: 'Resume', portfolio: 'Portfolio' },
+}[lang][page];
 ---
 
 <!doctype html>
@@ -113,7 +117,7 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
     </footer>
 
     {posthogKey && (
-      <script define:vars={{ posthogKey, posthogHost, page, lang }}>
+      <script define:vars={{ posthogKey, posthogHost, page, lang, analyticsPageTitle }}>
         const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
         if (!isLocalhost) {
@@ -174,6 +178,7 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
           });
 
           const baseProperties = {
+            page_title: analyticsPageTitle,
             page,
             lang,
             path: window.location.pathname,
@@ -181,7 +186,7 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
 
           window.posthog.capture('page_view', {
             ...baseProperties,
-            title: document.title,
+            document_title: document.title,
             url: window.location.href,
           });
 
@@ -194,10 +199,9 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
 
             window.posthog.capture('click', {
               ...baseProperties,
-              click_type: target.getAttribute('data-analytics-click'),
-              click_label: target.getAttribute('data-analytics-label') || target.textContent?.trim() || '',
+              click_element: target.getAttribute('data-analytics-click'),
+              click_title: target.getAttribute('data-analytics-title') || target.textContent?.trim() || '',
               href: target instanceof HTMLAnchorElement ? target.href : '',
-              project_id: target.getAttribute('data-analytics-project') || '',
             });
           });
         }
