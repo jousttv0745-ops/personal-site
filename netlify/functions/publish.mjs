@@ -39,7 +39,7 @@ export const handler = async (event, context) => {
         '',
         `Content file: \`${path}\``,
         '',
-        'Manual merge is required for the MVP publish flow.',
+        'Use Studio Admin Merge & Publish after preview review, or merge manually on GitHub.',
       ].join('\n'),
     });
 
@@ -57,6 +57,7 @@ export const handler = async (event, context) => {
     return json(200, {
       ok: true,
       branch,
+      prNumber: pr.number,
       prUrl: pr.html_url,
       previewUrl: buildPreviewUrl({ prNumber: pr.number, kind, locale }),
       publicSiteUrl: getConfig().publicSiteUrl,

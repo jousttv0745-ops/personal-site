@@ -110,6 +110,7 @@ export const contentHandler = (kind) => async (event, context) => {
     return json(200, {
       ok: true,
       branch,
+      prNumber: pr.number,
       prUrl: pr.html_url,
       previewUrl: buildPreviewUrl({ prNumber: pr.number, kind, locale }),
     });

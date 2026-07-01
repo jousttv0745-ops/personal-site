@@ -83,8 +83,10 @@ const studioData = {
           locale: state.locale,
           mode,
           branch: result.branch || '',
+          prNumber: result.prNumber || null,
           previewUrl: result.previewUrl || '',
           prUrl: result.prUrl || '',
+          publicUrl: result.publicUrl || result.publicSiteUrl || '',
           warning: result.warning || '',
           readyForReview: result.readyForReview ?? null,
           savedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -320,6 +322,47 @@ const studioData = {
           if (!response.ok) throw new Error(result.message || 'Publish PR failed');
           rememberDraft(result, state.section, 'publish');
           setMessage(result.warning || 'Publish PR is ready to merge.', result.warning ? 'warning' : 'success');
+        } catch (error) {
+          setMessage(error.message, 'error');
+        } finally {
+          state.saving = false;
+          render();
+        }
+      };
+
+      const mergeAndPublishCurrent = async () => {
+        const draft = state.lastDraft;
+        if (!draft?.prNumber || draft.kind !== state.section || draft.locale !== state.locale) {
+          setMessage('Publish Draft before merging.', 'warning');
+          render();
+          return;
+        }
+
+        const confirmed = window.confirm('This will merge the GitHub PR and update the public site. Continue?');
+        if (!confirmed) return;
+
+        let headers;
+        try {
+          headers = await authHeaders();
+        } catch (error) {
+          setMessage(error.message, 'error');
+          render();
+          return;
+        }
+
+        state.saving = true;
+        setMessage('Merging publish PR...', 'neutral');
+        render();
+        try {
+          const response = await fetch('/.netlify/functions/merge-publish', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', ...headers },
+            body: JSON.stringify({ prNumber: draft.prNumber, locale: state.locale, kind: state.section }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.message || 'Merge failed');
+          rememberDraft({ ...draft, ...result }, state.section, 'merged');
+          setMessage('Merged. Public site will update shortly.', 'success');
         } catch (error) {
           setMessage(error.message, 'error');
         } finally {
@@ -574,19 +617,25 @@ const studioData = {
         const draft = state.lastDraft;
         if (!draft || draft.kind !== state.section || draft.locale !== state.locale) return '';
         const isPublish = draft.mode === 'publish';
+        const isMerged = draft.mode === 'merged';
         return `
           <section class="draft-panel" aria-label="Saved draft links">
             <div>
-              <p class="draft-kicker">${isPublish ? 'Publish PR ready' : 'Saved draft'} ${escapeHtml(draft.savedAt)}</p>
-              <h2>${isPublish ? 'Ready to publish on GitHub' : 'Preview is ready to check'}</h2>
-              <p>${isPublish ? escapeHtml(draft.warning || 'Open the PR, wait for checks if GitHub shows any, then merge it to update the public GitHub Pages site.') : 'Netlify previews can take a short moment to refresh. If a change is inside a collapsed portfolio card, open that card on the preview page.'}</p>
+              <p class="draft-kicker">${isMerged ? 'Merged' : isPublish ? 'Publish PR ready' : 'Saved draft'} ${escapeHtml(draft.savedAt)}</p>
+              <h2>${isMerged ? 'Public site update is on its way' : isPublish ? 'Ready to publish on GitHub' : 'Preview is ready to check'}</h2>
+              <p>${isMerged ? 'GitHub has merged the PR. The public GitHub Pages site may take a short moment to rebuild and refresh.' : isPublish ? escapeHtml(draft.warning || 'Merge it here when the preview looks right, or open GitHub if you want to inspect the PR first.') : 'Netlify previews can take a short moment to refresh. If a change is inside a collapsed portfolio card, open that card on the preview page.'}</p>
             </div>
             <div class="draft-actions">
+              ${isMerged && draft.publicUrl ? `
+                <a class="primary-button" href="${escapeHtml(draft.publicUrl)}" target="_blank" rel="noreferrer">Open Public Site</a>
+                <button class="secondary-button" data-copy-url="${escapeHtml(draft.publicUrl)}" data-copy-label="Public site URL">Copy Public URL</button>
+              ` : ''}
               ${isPublish && draft.prUrl ? `
-                <a class="primary-button" href="${escapeHtml(draft.prUrl)}" target="_blank" rel="noreferrer">Open PR to Merge</a>
+                <button class="primary-button" data-action="merge-publish">Merge & Publish</button>
+                <a class="secondary-button" href="${escapeHtml(draft.prUrl)}" target="_blank" rel="noreferrer">Open PR</a>
                 <button class="secondary-button" data-copy-url="${escapeHtml(draft.prUrl)}" data-copy-label="PR URL">Copy PR URL</button>
               ` : ''}
-              ${draft.previewUrl ? `
+              ${draft.previewUrl && !isMerged ? `
                 <a class="${isPublish ? 'secondary-button' : 'primary-button'}" href="${escapeHtml(draft.previewUrl)}" target="_blank" rel="noreferrer">Open Preview</a>
                 <button class="secondary-button" data-copy-url="${escapeHtml(draft.previewUrl)}" data-copy-label="Preview URL">Copy Preview URL</button>
               ` : ''}
@@ -883,6 +932,7 @@ const studioData = {
             const action = button.dataset.action;
             if (action === 'save') saveCurrent();
             if (action === 'publish') publishCurrent();
+            if (action === 'merge-publish') mergeAndPublishCurrent();
             if (action === 'login') openLogin();
             if (action === 'logout') logout();
             if (action === 'add-project') addProject();

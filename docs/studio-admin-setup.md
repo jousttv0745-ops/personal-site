@@ -49,8 +49,8 @@ https://bucolic-pothos-6a8d26.netlify.app/studio/#invite_token=...
 4. Studio Admin writes JSON changes to a draft branch such as `cms/draft-portfolio-zh`.
 5. Studio Admin creates or updates a draft PR.
 6. Use the PR/deploy preview to review the site.
-7. Click `Publish Site` to prepare the publish PR.
-8. Manually merge the PR on GitHub.
+7. Click `Publish Draft` to prepare the publish PR.
+8. Click `Merge & Publish` after confirming the preview, or open the PR and merge manually on GitHub.
 9. GitHub Pages deploys the public site at the existing URL.
 
 ## Security Notes

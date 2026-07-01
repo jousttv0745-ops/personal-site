@@ -208,8 +208,28 @@ export const markPullRequestReady = async (pullRequestId) => {
   );
 };
 
+export const mergePullRequest = async ({ prNumber, kind, locale }) => {
+  const config = getConfig();
+  const mergeMethod = process.env.GITHUB_MERGE_METHOD;
+  const body = {
+    commit_title: `Publish ${kind} ${locale} updates`,
+    commit_message: 'Merged from Studio Admin.',
+  };
+  if (mergeMethod) body.merge_method = mergeMethod;
+
+  return github(`/repos/${config.repo}/pulls/${prNumber}/merge`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+};
+
 export const buildPreviewUrl = ({ prNumber, kind, locale }) => {
   const config = getConfig();
   if (!prNumber || !config.netlifySiteName) return null;
   return `https://deploy-preview-${prNumber}--${config.netlifySiteName}.netlify.app${previewPath(kind, locale)}`;
+};
+
+export const buildPublicUrl = ({ kind, locale }) => {
+  const config = getConfig();
+  return `${config.publicSiteUrl.replace(/\/$/, '')}${previewPath(kind, locale)}`;
 };
