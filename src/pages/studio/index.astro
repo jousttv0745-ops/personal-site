@@ -49,6 +49,7 @@ const studioData = {
         saving: false,
         message: 'Ready',
         messageType: 'neutral',
+        lastDraft: null,
         authReady: false,
         user: null,
         query: '',
@@ -73,6 +74,18 @@ const studioData = {
         state.message = message;
         state.messageType = type;
         syncStatusPill();
+      };
+
+      const rememberDraft = (result, kind) => {
+        if (!result?.previewUrl && !result?.prUrl) return;
+        state.lastDraft = {
+          kind,
+          locale: state.locale,
+          branch: result.branch || '',
+          previewUrl: result.previewUrl || '',
+          prUrl: result.prUrl || '',
+          savedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
       };
 
       const syncStatusPill = () => {
@@ -271,7 +284,8 @@ const studioData = {
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.message || 'Save failed');
           state.dirty = false;
-          setMessage(result.previewUrl ? `Draft saved. Preview: ${result.previewUrl}` : 'Draft saved.', 'success');
+          rememberDraft(result, kind);
+          setMessage('Draft saved.', 'success');
         } catch (error) {
           setMessage(error.message, 'error');
         } finally {
@@ -301,7 +315,8 @@ const studioData = {
           });
           const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(result.message || 'Publish PR failed');
-          setMessage(result.prUrl ? `Publish PR ready: ${result.prUrl}` : 'Publish PR ready.', 'success');
+          rememberDraft(result, state.section);
+          setMessage('Publish PR ready.', 'success');
         } catch (error) {
           setMessage(error.message, 'error');
         } finally {
@@ -549,6 +564,30 @@ const studioData = {
         </button>
       `;
 
+      const renderDraftPanel = () => {
+        const draft = state.lastDraft;
+        if (!draft || draft.kind !== state.section || draft.locale !== state.locale) return '';
+        return `
+          <section class="draft-panel" aria-label="Saved draft links">
+            <div>
+              <p class="draft-kicker">Saved draft ${escapeHtml(draft.savedAt)}</p>
+              <h2>Preview is ready to check</h2>
+              <p>Netlify previews can take a short moment to refresh. If a change is inside a collapsed portfolio card, open that card on the preview page.</p>
+            </div>
+            <div class="draft-actions">
+              ${draft.previewUrl ? `
+                <a class="primary-button" href="${escapeHtml(draft.previewUrl)}" target="_blank" rel="noreferrer">Open Preview</a>
+                <button class="secondary-button" data-copy-url="${escapeHtml(draft.previewUrl)}" data-copy-label="Preview URL">Copy Preview URL</button>
+              ` : ''}
+              ${draft.prUrl ? `
+                <a class="secondary-button" href="${escapeHtml(draft.prUrl)}" target="_blank" rel="noreferrer">Open PR</a>
+                <button class="secondary-button" data-copy-url="${escapeHtml(draft.prUrl)}" data-copy-label="PR URL">Copy PR URL</button>
+              ` : ''}
+            </div>
+          </section>
+        `;
+      };
+
       const renderPortfolio = () => {
         const projects = filteredProjects();
         const project = selectedProject();
@@ -575,6 +614,7 @@ const studioData = {
                 <button class="secondary-button" data-action="save">Save Changes</button>
               </div>
             </div>
+            ${renderDraftPanel()}
             <div class="portfolio-grid">
               <div class="table-panel">
                 <div class="table-head">
@@ -657,6 +697,7 @@ const studioData = {
                 <button class="secondary-button" data-action="save">Save Changes</button>
               </div>
             </div>
+            ${renderDraftPanel()}
             <div class="resume-grid">
               <div class="entry-panel">
                 <div class="panel-title">
@@ -838,6 +879,18 @@ const studioData = {
             if (action === 'add-experience') addExperience();
             if (action === 'remove-experience') removeExperience();
             if (action === 'add-group') addGroup();
+          });
+        });
+
+        root.querySelectorAll('[data-copy-url]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const label = button.dataset.copyLabel || 'URL';
+            try {
+              await navigator.clipboard.writeText(button.dataset.copyUrl);
+              setMessage(`${label} copied.`, 'success');
+            } catch (error) {
+              setMessage(`Could not copy ${label}.`, 'error');
+            }
           });
         });
 
@@ -1200,6 +1253,48 @@ const studioData = {
         font-size: 34px;
         font-weight: 850;
         letter-spacing: 0;
+      }
+
+      .draft-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+        border: 1px solid #b8d8c2;
+        border-radius: 8px;
+        background: #f4fbf6;
+        padding: 18px 20px;
+      }
+
+      .draft-panel h2 {
+        margin: 2px 0 4px;
+        color: #17201a;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .draft-panel p {
+        max-width: 680px;
+        color: #526057;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .draft-kicker {
+        color: #137333;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .draft-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
       }
 
       .portfolio-grid {
@@ -1571,6 +1666,21 @@ const studioData = {
         .auth-chip {
           width: 100%;
           max-width: none;
+        }
+
+        .draft-panel {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .draft-actions {
+          justify-content: stretch;
+        }
+
+        .draft-actions a,
+        .draft-actions button {
+          flex: 1 1 180px;
+          text-align: center;
         }
 
         .portfolio-grid,
