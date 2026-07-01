@@ -9,7 +9,7 @@
   "projects": [
     {
       "outcomes": [
-        "初步建立可量化的 PM 工時節省機制，將每週專案檢視、規格整理與任務拆解納入 AI 輔助流程",
+        "建立可量化的 PM 工時節省機制，將每週專案檢視、規格整理與任務拆解納入 AI 輔助流程",
         "用 AI 將 PRD、Schema、Vocabulary、SDK spec 轉換為 GitHub 上可追蹤、可回溯的版本化規格，降低文件分散與決策遺失風險"
       ],
       "summary": "在 Rich Data 專案中，設計一套 AI-assisted、human-governed 的資料產品工作流：AI 協助擴大資訊蒐集、推演 Schema / Vocabulary 與 SDK 調用邏輯、產製 PRD 草稿，並透過 GitHub 與 Claude Code 將規格更新轉換為可追蹤的 ticket / issue 草稿。整個流程以人類 PM 作為決策與治理核心，透過 CLAUDE.md、GitHub 版本控管與貼標正確率門檻，確保 AI 產出能被審核、校正並回饋到產品迭代中。",
