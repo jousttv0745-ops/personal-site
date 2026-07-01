@@ -8,7 +8,7 @@
 - Resume 日期先維持現有 `period` 文字欄位，不在 MVP 改成 `startDate` / `endDate` / `current`。
 - Resume 的 Skills 維持目前全履歷層級，不放進單一 Experience。
 - Portfolio 的 Live toggle 等同於 `status = "published"`；關閉則為 `status = "draft"`。
-- `Publish Site` 在 MVP 中先建立或更新 PR，讓使用者手動確認與 merge，不直接自動 merge 到 `main`。
+- `Publish Draft` 在 MVP 中建立或更新 PR；使用者確認 preview 後可在後台按 `Merge & Publish` 合併，或保留 GitHub 手動 merge 作為 fallback。
 - 圖片上傳 MVP 先限制格式與檔案大小，不做自動壓縮；自動壓縮放到後續階段。
 
 ## 1. 背景與目標
@@ -71,7 +71,7 @@
 5. 進入 Resume，左側看到 Experience Entries，右側編輯選取的工作經歷。
 6. 儲存變更後，系統建立 GitHub branch / PR 或更新既有草稿 PR。
 7. 系統顯示 preview link。
-8. 使用者確認後按 Publish Site，系統建立或更新 publish PR，並提供 PR / preview 連結供使用者手動確認與 merge。
+8. 使用者確認後按 Publish Draft，系統建立或更新 publish PR；再按 Merge & Publish 合併並觸發正式站部署。
 
 ## 4. Wireframe 解讀
 
@@ -82,7 +82,7 @@
 - 左側固定 sidebar。
 - 上方有搜尋列與使用者/通知 icon。
 - 主內容區依功能切換。
-- 左下固定 `Publish Site` CTA。
+- 左下固定 `Publish Draft` CTA。
 
 MVP 中 sidebar 項目：
 
@@ -238,14 +238,14 @@ MVP 採用「草稿分支 + PR」模式。
 
 發布準備流程：
 
-1. 使用者按 Publish Site。
+1. 使用者按 Publish Draft。
 2. Function 確認草稿分支內容已通過 schema validation。
 3. Function 建立或更新對應 PR。
 4. Function 回傳 PR URL 與 preview URL。
-5. 使用者前往 GitHub 手動確認與 merge。
-6. PR merge 後，GitHub Pages workflow 自動部署。
-7. 後台輪詢 GitHub Actions 狀態。
-8. 顯示 `Deploying` / `Live` / `Failed`。
+5. 使用者確認 preview 後按 Merge & Publish。
+6. Function 驗證 PR 來源為對應 `cms/draft-*` 分支，並呼叫 GitHub merge API。
+7. PR merge 後，GitHub Pages workflow 自動部署。
+8. 後台顯示 public site URL，並提示正式站可能需要短時間刷新。
 
 ### 5.5 Preview 流程
 
@@ -600,7 +600,8 @@ netlify/
 
 - 建立 draft branch / PR。
 - 顯示 preview URL。
-- Publish Site 建立或更新 publish PR。
+- Publish Draft 建立或更新 publish PR。
+- Merge & Publish 在後台內合併已確認的 publish PR。
 - Deploy status。
 
 ### Phase 5: Polish
@@ -618,5 +619,5 @@ netlify/
 1. 是否將 `/studio/` 在穩定後正式取代 `/admin/`？
 2. Resume 是否升級為結構化日期：`startDate` / `endDate` / `current`？
 3. 是否允許每一條 Experience 擁有自己的 skills/tags？
-4. 是否將 Publish Site 從「建立 PR」升級為「後台內一鍵 merge」？
+4. 是否在 Merge & Publish 後加入 GitHub Pages 部署狀態輪詢與完成通知？
 5. 圖片上傳是否加入自動壓縮、尺寸裁切與 WebP 轉檔？
