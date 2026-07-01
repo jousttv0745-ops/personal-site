@@ -9,6 +9,8 @@ interface Props {
 
 const { title, lang, page } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
 
 const nav = {
   zh: [
@@ -27,6 +29,10 @@ const otherLang    = lang === 'zh' ? 'en' : 'zh';
 const langLabel    = lang === 'zh' ? 'EN' : '中';
 const displayName  = lang === 'zh' ? '杜韋樺' : 'Tu, Wei-Hua';
 const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' }[page];
+const analyticsPageTitle = {
+  zh: { about: '關於我', resume: '履歷', portfolio: '作品集' },
+  en: { about: 'About', resume: 'Resume', portfolio: 'Portfolio' },
+}[lang][page];
 ---
 
 <!doctype html>
@@ -109,6 +115,98 @@ const pageLabel    = { about: 'About', resume: 'Resume', portfolio: 'Portfolio' 
     <footer class="lg:hidden border-t-2 border-[#0a0a0a] py-4 px-6">
       <span class="section-label">© 2025 {displayName}</span>
     </footer>
+
+    {posthogKey && (
+      <script define:vars={{ posthogKey, posthogHost, page, lang, analyticsPageTitle }}>
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+        if (!isLocalhost) {
+          (function (documentRef, posthogRef) {
+            if (posthogRef.__SV) return;
+            window.posthog = posthogRef;
+            posthogRef._i = [];
+            posthogRef.init = function (token, config, name) {
+              function stub(target, method) {
+                const parts = method.split('.');
+                if (parts.length === 2) {
+                  target = target[parts[0]];
+                  method = parts[1];
+                }
+                target[method] = function () {
+                  target.push([method].concat(Array.prototype.slice.call(arguments, 0)));
+                };
+              }
+
+              const scriptEl = documentRef.createElement('script');
+              scriptEl.type = 'text/javascript';
+              scriptEl.crossOrigin = 'anonymous';
+              scriptEl.async = true;
+              scriptEl.src = config.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js';
+              const firstScript = documentRef.getElementsByTagName('script')[0];
+              firstScript.parentNode.insertBefore(scriptEl, firstScript);
+
+              let instance = posthogRef;
+              if (name !== undefined) {
+                instance = posthogRef[name] = [];
+              }
+
+              instance.people = instance.people || [];
+              instance.toString = function (includeStub) {
+                let label = 'posthog';
+                if (name !== undefined) label += '.' + name;
+                if (!includeStub) label += ' (stub)';
+                return label;
+              };
+              instance.people.toString = function () {
+                return instance.toString(1) + '.people (stub)';
+              };
+
+              'capture register register_once unregister get_distinct_id reset opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing'.split(' ').forEach(function (method) {
+                stub(instance, method);
+              });
+
+              posthogRef._i.push([token, config, name]);
+            };
+            posthogRef.__SV = 1;
+          })(document, window.posthog || []);
+
+          window.posthog.init(posthogKey, {
+            api_host: posthogHost,
+            autocapture: false,
+            capture_pageview: false,
+            capture_pageleave: false,
+          });
+
+          const baseProperties = {
+            page_title: analyticsPageTitle,
+            page,
+            lang,
+            path: window.location.pathname,
+          };
+
+          window.posthog.capture('page_view', {
+            ...baseProperties,
+            document_title: document.title,
+            url: window.location.href,
+          });
+
+          document.addEventListener('click', (event) => {
+            const target = event.target instanceof Element
+              ? event.target.closest('[data-analytics-click]')
+              : null;
+
+            if (!target) return;
+
+            window.posthog.capture('click', {
+              ...baseProperties,
+              click_element: target.getAttribute('data-analytics-click'),
+              click_title: target.getAttribute('data-analytics-title') || target.textContent?.trim() || '',
+              href: target instanceof HTMLAnchorElement ? target.href : '',
+            });
+          });
+        }
+      </script>
+    )}
 
   </body>
 </html>
