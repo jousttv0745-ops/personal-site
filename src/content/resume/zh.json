@@ -85,11 +85,32 @@
   "skills": [
     {
       "category": "Technical",
-      "items": ["GA4", "Looker Studio", "CDP (mParticle)", "BigQuery SQL", "n8n", "ETL Pipeline", "Taxonomy Design", "Figma", "Claude Code"]
+      "items": [
+        "GA4",
+        "Looker Studio",
+        "CDP (mParticle)",
+        "BigQuery SQL",
+        "n8n",
+        "ETL Pipeline",
+        "Taxonomy Design",
+        "Figma",
+        "Claude Code",
+        "Codex"
+      ]
     },
     {
       "category": "Strategic",
-      "items": ["Strategic Operations", "Audience Intelligence", "Stakeholder Management", "Data Product Strategy", "Cross-Functional Alignment", "Operational Framework Design", "Commercial Narrative", "Problem Framing", "Public Communication"]
+      "items": [
+        "Strategic Operations",
+        "Audience Intelligence",
+        "Stakeholder Management",
+        "Data Product Strategy",
+        "Cross-Functional Alignment",
+        "Operational Framework Design",
+        "Commercial Narrative",
+        "Problem Framing",
+        "Public Communication"
+      ]
     }
   ]
 }
